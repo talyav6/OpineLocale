@@ -6,13 +6,13 @@ import {getFirestore} from "firebase/firestore"
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
-    apiKey: "AIzaSyBj8_HiVCcL1d08_72Csy1nsiQdeXtaN7I",
-    authDomain: "trip-review-c0058.firebaseapp.com",
-    projectId: "trip-review-c0058",
-    storageBucket: "trip-review-c0058.appspot.com",
-    messagingSenderId: "443408447104",
-    appId: "1:443408447104:web:8b032c166e7cf74debd865"
-  };
+  apiKey: "AIzaSyA8HMcpQ7RCHZk0VZLkMc-WzX5sh6KYSFc",
+  authDomain: "trip-review-8afde.firebaseapp.com",
+  projectId: "trip-review-8afde",
+  storageBucket: "trip-review-8afde.appspot.com",
+  messagingSenderId: "368852105993",
+  appId: "1:368852105993:web:a48cb7aa0e6319583331d8"
+};
 
 // Initialize Firebase
 initializeApp(firebaseConfig);
