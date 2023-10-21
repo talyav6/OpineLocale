@@ -4,6 +4,7 @@ import Profile from "./pages/Profile";
 import Login from "./pages/Login";
 import SignUp from "./pages/SignUp";
 import ForgotPassword from "./pages/ForgotPassword";
+import PrivateRoute from "./components/PrivateRoute";
 import Header from "./components/Header";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -37,11 +38,17 @@ function App() {
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/search" element={<Search />} />
           <Route path="/search-result" element={<SearchResult />} />
-          <Route path="/review-submit" element={<ReviewSubmit />} />
+          <Route path="review-submit" element={<PrivateRoute />}>
+            <Route path="/review-submit/:businessId" element={<ReviewSubmit />} />
+          </Route>
+          
           <Route path="/user-admin" element={<UserAdmin />} />
           <Route path="/user-public" element={<UserPublic />} />
-          <Route path="/business-admin" element={<BusinessAdmin />} />
-          <Route path="/business-public" element={<BusinessPublic />} />
+          <Route path="business-admin" element={<PrivateRoute />}>
+            <Route path="/business-admin" element={<BusinessAdmin />} />
+          </Route>
+          
+          <Route path="/business-public/:businessId" element={<BusinessPublic />} />
           <Route path="/settings" element={<Settings />} />
           <Route path="/recommendation" element={<Recommendation />} />
           <Route path="/map" element={<Map />} />
