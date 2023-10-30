@@ -1,10 +1,5 @@
-import { doc, getDoc } from "firebase/firestore";
 import { useState } from "react";
-import { useEffect } from "react";
-import { useParams, useLocation, useNavigate } from "react-router-dom";
 import Spinner from "../components/Spinner";
-import { db } from "../firebase";
-import { getAuth } from "firebase/auth";
 import { toast } from "react-toastify";
 import {
   getStorage,
@@ -12,33 +7,55 @@ import {
   uploadBytesResumable,
   getDownloadURL,
 } from "firebase/storage";
+import { getAuth } from "firebase/auth";
 import { v4 as uuidv4 } from "uuid";
-import { updateDoc, addDoc, collection, serverTimestamp } from "firebase/firestore";
+import {
+  doc,
+  getDoc,
+  serverTimestamp,
+  updateDoc,
+} from "firebase/firestore";
+import { db } from "../firebase";
+import { useNavigate } from "react-router-dom";
+import { useEffect } from "react";
 
-
-export default function ReviewSubmit() {
-  const auth = getAuth();
-  const params = useParams();
-  const location = useLocation();
+export default function EditUserProfile() {
   const navigate = useNavigate();
-  const [business, setBusiness] = useState(null);
-  const [loading, setLoading] = useState(true);
-
+  const auth = getAuth();
+  const [loading, setLoading] = useState(false);
+  const [userProfile, setUserProfile] = useState(null);
   const [formData, setFormData] = useState({
-    rating: "",
-    title: "",
-    review: "",
-    review_date: "",
+    name: "",
+    bio: "",
     images: {},
   });
   const {
-    rating,
-    title,
-    review,
-    review_date,
+    name,
+    bio,
     images,
   } = formData;
-  
+
+
+
+
+
+  useEffect(() => {
+    setLoading(true);
+    async function fetchUserProfile() {
+      const docRef = doc(db, "users", auth.currentUser.uid);
+      const docSnap = await getDoc(docRef);
+      if (docSnap.exists()) {
+        setUserProfile(docSnap.data());
+        setFormData({ ...docSnap.data() });
+        setLoading(false);
+      } else {
+        navigate("/");
+        toast.error("setUserProfile does not exist");
+      }
+    }
+    fetchUserProfile();
+  }, [navigate, auth.currentUser.uid]);
+
   function onChange(e) {
     let boolean = null;
     if (e.target.value === "true") {
@@ -62,17 +79,11 @@ export default function ReviewSubmit() {
       }));
     }
   }
-
   async function onSubmit(e) {
     e.preventDefault();
     setLoading(true);
-
-    if (images.length > 6) {
-      setLoading(false);
-      toast.error("maximum 6 images are allowed");
-      return;
-    }
     
+
 
     async function storeImage(image) {
       return new Promise((resolve, reject) => {
@@ -112,7 +123,7 @@ export default function ReviewSubmit() {
       });
     }
 
-    const imgUrls = await Promise.all(
+    const photoUrls = await Promise.all(
       [...images].map((image) => storeImage(image))
     ).catch((error) => {
       setLoading(false);
@@ -122,120 +133,47 @@ export default function ReviewSubmit() {
 
     const formDataCopy = {
       ...formData,
-      imgUrls,
+      photoUrls,
       timestamp: serverTimestamp(),
       userRef: auth.currentUser.uid,
-      businessId : params.businessId
     };
     delete formDataCopy.images;
-    const docRef = await addDoc(collection(db, "reviews"), formDataCopy);
-    const businessData = {
-      total_number_of_ratings : 1 + business.total_number_of_ratings,
-      sum_of_ratings : parseInt(formData.rating) + business.sum_of_ratings,
-    };
-    const businessRef = doc(db, "businesses", params.businessId);
-    await updateDoc(businessRef, businessData);
-    setLoading(false);
-    toast.success("Review created");
-    navigate(`/business-public/${params.businessId}`);
-  }
+    const docRef = doc(db, "users", auth.currentUser.uid);
 
-  useEffect(() => {
-    async function fetchBusiness() {
-      const docRef = doc(db, "businesses", params.businessId);
-      const docSnap = await getDoc(docRef);
-      if (docSnap.exists()) {
-        setBusiness(docSnap.data());
-        setLoading(false);
-      }
-    }
-    fetchBusiness();
-  }, [params.businessId]);
+    await updateDoc(docRef, formDataCopy);
+    setLoading(false);
+    toast.success("User Profile Edited");
+    navigate(`/user-public/${docRef.id}`);
+  }
   if (loading) {
     return <Spinner />;
   }
   return (
     <>
-      <div className="flex justify-between max-w-6xl mx-auto px-3 py-3 items-center">
-      <div>
-      <form onSubmit={onSubmit}>
+      <section>
+        <h1 className="text-3xl text-center mt-3 font-bold">
+          Your Profile
+        </h1>
+        <div className="flex justify-center flex-wrap items-center px-6 py-4 max-w-6xl mx-auto">
+          <form onSubmit={onSubmit}>
             <div class="space-y-12">
               <div class="border-b border-gray-900/10 pb-12">
                 <div class="mt-10 grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6">
                   <div class="sm:col-span-4">
                     <label
-                      for="rating"
+                      for="business_name"
                       class="block text-sm font-medium leading-6 text-gray-900"
                     >
-                      How do you rate your experience out of 5 stars?
+                      Your Name
                     </label>
                     <div class="mt-2">
                       <input
                         type="text"
-                        id="rating"
-                        name="rating"
-                        value={rating}
+                        id="name"
+                        name="name"
+                        value={name}
                         onChange={onChange}
-                        class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
-                      />
-                    </div>
-                  </div>
-
-                  
-
-                  <div class="col-span-full">
-                    <label
-                      for="title"
-                      class="block text-sm font-medium leading-6 text-gray-900"
-                    >
-                      Title
-                    </label>
-                    <div class="mt-2">
-                      <input
-                        type="text"
-                        name="title"
-                        id="title"
-                        value={title}
-                        onChange={onChange}
-                        class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
-                      />
-                    </div>
-                  </div>
-
-                  <div class="col-span-full">
-                    <label
-                      for="review"
-                      class="block text-sm font-medium leading-6 text-gray-900"
-                    >
-                      Write your review here
-                    </label>
-                    <div class="mt-2">
-                      <textarea
-                        id="review"
-                        name="review"
-                        rows="3"
-                        class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
-                        value={review}
-                        onChange={onChange}
-                      ></textarea>
-                    </div>
-                  </div>
-
-                  <div class="col-span-full">
-                    <label
-                      for="review_date"
-                      class="block text-sm font-medium leading-6 text-gray-900"
-                    >
-                      When was your visit?
-                    </label>
-                    
-                    <div class="mt-2">
-                      <input
-                        type="text"
-                        name="review_date"
-                        id="review_date"
-                        value={review_date}
-                        onChange={onChange}
+                        autocomplete="name"
                         class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
                       />
                     </div>
@@ -247,7 +185,7 @@ export default function ReviewSubmit() {
                       for="cover-photo"
                       class="block text-sm font-medium leading-6 text-gray-900"
                     >
-                      Add photos(optional)
+                      Profile Photo
                     </label>
                     <div class="mt-2 flex justify-center rounded-lg border border-dashed border-gray-900/25 px-6 py-10">
                       <div class="text-center">
@@ -274,25 +212,39 @@ export default function ReviewSubmit() {
                               id="images"
                               onChange={onChange}
                               accept=".jpg,.png,.jpeg"
-                              multiple
                               required
                               className="w-full px-3 py-1.5 text-gray-700 bg-white border border-gray-300 rounded transition duration-150 ease-in-out focus:bg-white focus:border-slate-600"
                             />
                           </label>
-                          <p class="pl-1">or drag and drop</p>
+                         
                         </div>
-                        <p class="text-xs leading-5 text-gray-600">
-                          PNG, JPG, GIF up to 10MB
-                        </p>
+                        
                       </div>
                     </div>
                   </div>
 
-                  
+                  <div class="col-span-full">
+                    <label
+                      for="description"
+                      class="block text-sm font-medium leading-6 text-gray-900"
+                    >
+                      Bio
+                    </label>
+                    <div class="mt-2">
+                      <textarea
+                        id="bio"
+                        name="bio"
+                        rows="3"
+                        class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                        value={bio}
+                        onChange={onChange}
+                      ></textarea>
+                    </div>
+                  </div>
                 </div>
               </div>
 
-              
+             
             </div>
 
             <div class="mt-6 flex items-center justify-end gap-x-6">
@@ -304,28 +256,8 @@ export default function ReviewSubmit() {
               </button>
             </div>
           </form>
-
-      </div>
-      <div>
-      <div>
-          <p>{business.business_name}</p>
-          </div>
-      
-      <div className="flex justify-between max-w-6xl mx-auto px-3  items-center">
-        <img src={business.imgUrls[0]} className="h-12" />
-      </div>
-      <div className="flex justify-between max-w-6xl mx-auto px-3  items-center">
-        <p>{business.street_address}</p>
-      </div>
-      <div className="flex justify-between max-w-6xl mx-auto px-3  items-center">
-        <p>
-          {business.region} {business.city} {business.postal_code}
-        </p>
-      </div>
-      </div>
-        
-      </div>
-
+        </div>
+      </section>
     </>
   );
 }

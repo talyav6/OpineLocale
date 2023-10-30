@@ -12,9 +12,10 @@ import Search from "./pages/Search";
 import ReviewSearch from "./pages/ReviewSearch";
 import SearchResult from "./pages/SearchResult";
 import ReviewSubmit from "./pages/ReviewSubmit";
-import UserAdmin from "./pages/UserAdmin";
+import EditUserProfile from "./pages/EditUserProfile";
 import UserPublic from "./pages/UserPublic";
-import BusinessAdmin from "./pages/BusinessAdmin";
+import CreateBusiness from "./pages/CreateBusiness";
+import EditBusiness from "./pages/EditBusiness";
 import BusinessPublic from "./pages/BusinessPublic";
 import Settings from "./pages/Settings";
 import Recommendation from "./pages/Recommendation";
@@ -37,17 +38,23 @@ function App() {
           <Route path="/sign-up" element={<SignUp />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/search" element={<Search />} />
-          <Route path="/search-result" element={<SearchResult />} />
+          <Route path="/search-result/:keyword" element={<SearchResult />} />
           <Route path="review-submit" element={<PrivateRoute />}>
             <Route path="/review-submit/:businessId" element={<ReviewSubmit />} />
           </Route>
           
-          <Route path="/user-admin" element={<UserAdmin />} />
-          <Route path="/user-public" element={<UserPublic />} />
-          <Route path="business-admin" element={<PrivateRoute />}>
-            <Route path="/business-admin" element={<BusinessAdmin />} />
+          <Route path="edit-user-profile" element={<PrivateRoute />}>
+            <Route path="/edit-user-profile" element={<EditUserProfile />} />
           </Route>
           
+          <Route path="/user-public/:userProfileId" element={<UserPublic />} />
+
+          <Route path="business-create" element={<PrivateRoute />}>
+            <Route path="/business-create" element={<CreateBusiness />} />
+          </Route>
+          <Route path="business-edit" element={<PrivateRoute />}>
+            <Route path="/business-edit" element={<EditBusiness />} />
+          </Route>
           <Route path="/business-public/:businessId" element={<BusinessPublic />} />
           <Route path="/settings" element={<Settings />} />
           <Route path="/recommendation" element={<Recommendation />} />

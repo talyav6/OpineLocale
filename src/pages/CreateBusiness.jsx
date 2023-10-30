@@ -9,17 +9,17 @@ import {
 } from "firebase/storage";
 import { getAuth } from "firebase/auth";
 import { v4 as uuidv4 } from "uuid";
-import { addDoc, collection, serverTimestamp } from "firebase/firestore";
+import { addDoc, setDoc,collection, doc, serverTimestamp } from "firebase/firestore";
 import { db } from "../firebase";
 import { useNavigate } from "react-router-dom";
 
-export default function BusinessAdmin() {
+export default function CreateBusiness() {
   const navigate = useNavigate();
   const auth = getAuth();
   const [geolocationEnabled, setGeolocationEnabled] = useState(true);
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
-    business_name: "t",
+    business_name: "",
     business_type: "",
     street_address: "",
     city: "",
@@ -155,11 +155,16 @@ export default function BusinessAdmin() {
       geolocation,
       timestamp: serverTimestamp(),
       userRef: auth.currentUser.uid,
+      sum_of_ratings: 0,
+      total_number_of_ratings: 0,
     };
     delete formDataCopy.images;
     delete formDataCopy.latitude;
     delete formDataCopy.longitude;
-    const docRef = await addDoc(collection(db, "businesses"), formDataCopy);
+    //const docRef = await db.collection('businesses').doc(auth.currentUser.uid).set(formDataCopy);
+    //const docRef = await addDoc(collection(db, "businesses"), formDataCopy);
+    const docRef = doc(collection(db, "businesses"), auth.currentUser.uid);
+    await setDoc(docRef, formDataCopy);
     setLoading(false);
     toast.success("Business created");
     navigate(`/business-public/${docRef.id}`);
@@ -172,9 +177,9 @@ export default function BusinessAdmin() {
     <>
       <section>
         <h1 className="text-3xl text-center mt-6 font-bold">
-          Business Admin Page
+          Create your Business!
         </h1>
-        <div className="flex justify-center flex-wrap items-center px-6 py-12 max-w-6xl mx-auto">
+        <div className="flex justify-center flex-wrap items-center px-6 py-4 max-w-6xl mx-auto">
           <form onSubmit={onSubmit}>
             <div class="space-y-12">
               <div class="border-b border-gray-900/10 pb-12">

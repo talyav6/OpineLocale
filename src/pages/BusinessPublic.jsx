@@ -71,18 +71,18 @@ export default function BusinessPublic() {
   }
   return (
     <>
-      <diV className="flex justify-between max-w-6xl mx-auto px-3 py-3 items-center">
-        <diV className="flex items-baseline ">
+      <div className="flex justify-between max-w-6xl mx-auto px-3 py-3 items-center">
+        <div className="flex items-baseline ">
           <div>
             <h1 className="text-2xl font-bold tracking-tight text-gray-900 sm:text-3xl">
               {business.business_name}
             </h1>
           </div>
           <div className="px-10">
-            <h3>{reviewListings && reviewListings.length} Reviews</h3>
+            <h3>{business.total_number_of_ratings} Reviews</h3>
           </div>
-        </diV>
-        <diV>
+        </div>
+        <div>
           <button
             type="submit"
             className=" flex w-full items-center justify-center rounded-md border border-transparent bg-indigo-600 px-8 py-3 text-base font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
@@ -90,8 +90,8 @@ export default function BusinessPublic() {
           >
             Leave a review
           </button>
-        </diV>
-      </diV>
+        </div>
+      </div>
       <div className="flex justify-between max-w-6xl mx-auto px-3  items-center">
         <p>{business.business_type}</p>
       </div>

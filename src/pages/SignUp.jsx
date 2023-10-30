@@ -18,8 +18,9 @@ export default function SignUp() {
     name: "",
     email: "",
     password: "",
+    role: "",
   });
-  const { name, email, password } = formData;
+  const { name, email, password,role } = formData;
   const navigate = useNavigate();
   function onChange(e) {
     setFormData((prevState) => ({
@@ -38,16 +39,18 @@ export default function SignUp() {
         password
       );
 
+
       updateProfile(auth.currentUser, {
         displayName: name,
       });
       const user = userCredential.user;
-      const formDataCopy = { ...formData };
+      const formDataCopy = { ...formData,
+      };
       delete formDataCopy.password;
       formDataCopy.timestamp = serverTimestamp();
 
       await setDoc(doc(db, "users", user.uid), formDataCopy);
-      // toast.success("Sign up was successful");
+       toast.success("Sign up was successful");
       // navigate("/");
     } catch (error) {
       toast.error("Something went wrong with the registration");
@@ -57,14 +60,7 @@ export default function SignUp() {
     <section>
       <h1 className="text-3xl text-center mt-6 font-bold">Sign Up</h1>
       <div className="flex justify-center flex-wrap items-center px-6 py-12 max-w-6xl mx-auto">
-        <div className="md:w-[67%] lg:w-[50%] mb-12 md:mb-6">
-          <img
-            src="https://images.unsplash.com/flagged/photo-1564767609342-620cb19b2357?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1373&q=80"
-            alt="key"
-            className="w-full rounded-2xl"
-          />
-        </div>
-        <div className="w-full md:w-[67%] lg:w-[40%] lg:ml-20">
+
           <form onSubmit={onSubmit}>
             <input
               type="text"
@@ -103,7 +99,28 @@ export default function SignUp() {
                 />
               )}
             </div>
-            <div className="flex justify-between whitespace-nowrap text-sm sm:text-lg">
+            <div class="sm:col-span-3">
+                    <label
+                      for="business_type"
+                      class="block text-sm font-medium leading-6 text-gray-900"
+                    >
+                      You are a user or own a business?
+                    </label>
+                    <div class="mt-2">
+                      <select
+                        id="role"
+                        name="role"
+                        value={role}
+                        onChange={onChange}
+                        autocomplete="role"
+                        class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:max-w-xs sm:text-sm sm:leading-6"
+                      >
+                        <option>User</option>
+                        <option>Business</option>
+                      </select>
+                    </div>
+                  </div>
+            <div className="flex justify-between whitespace-nowrap text-sm sm:text-lg py-5">
               <p className="mb-6">
                 Have a account?
                 <Link
@@ -133,7 +150,7 @@ export default function SignUp() {
             </div>
             <OAuth />
           </form>
-        </div>
+        
       </div>
     </section>
   );
