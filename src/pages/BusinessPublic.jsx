@@ -9,12 +9,12 @@ import {
   where,
 } from "firebase/firestore";
 
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { useEffect } from "react";
 import { useParams, useLocation, useNavigate } from "react-router-dom";
 import Spinner from "../components/Spinner";
 import { db } from "../firebase";
-import { getAuth } from "firebase/auth";
+import { getAuth, onAuthStateChanged } from "firebase/auth";
 import ReviewItem from "../components/ReviewItem";
 import RatingStarsItemTotalReviews from "../components/RatingStarsItemTotalReviews";
 import { Swiper, SwiperSlide } from "swiper/react";
@@ -26,6 +26,10 @@ import SwiperCore, {
 } from "swiper";
 import "swiper/css/bundle";
 import { MapContainer, Marker, Popup, TileLayer } from "react-leaflet";
+
+import { render } from "react-dom";
+import Gallery from "react-photo-gallery";
+import Carousel, { Modal, ModalGateway } from "react-images";
 
 export default function BusinessPublic() {
   const [reviewListings, setReviewListings] = useState(null);
@@ -58,12 +62,36 @@ export default function BusinessPublic() {
     }
     fetchListings();
   }, []);
-  const auth = getAuth();
+  
   const params = useParams();
   const location = useLocation();
   const navigate = useNavigate();
   const [business, setBusiness] = useState(null);
   const [loading, setLoading] = useState(true);
+  const auth = getAuth();
+  const [role, setRole] = useState(null);
+  useEffect(() => {
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        
+
+        const userRef = doc(db, "users", user.uid);
+        const userSnap = getDoc(userRef).then((uitem) => {
+          let role = "User";
+
+          if(uitem.get("role") != null) {
+            setRole(uitem.data().role);
+          } else {
+            setRole("User");  
+          }
+        
+      });
+      } else {
+        setRole("Guest");
+      }
+      
+    });
+  }, [auth]);
 
   useEffect(() => {
     async function fetchBusiness() {
@@ -76,6 +104,21 @@ export default function BusinessPublic() {
     }
     fetchBusiness();
   }, [params.businessId]);
+
+
+
+  const [currentImage, setCurrentImage] = useState(0);
+  const [viewerIsOpen, setViewerIsOpen] = useState(false);
+
+  const openLightbox = useCallback((event, { photo, index }) => {
+    setCurrentImage(index);
+    setViewerIsOpen(true);
+  }, []);
+
+  const closeLightbox = () => {
+    setCurrentImage(0);
+    setViewerIsOpen(false);
+  };
 
   if (loading) {
     return <Spinner />;
@@ -91,7 +134,7 @@ export default function BusinessPublic() {
 
             <RatingStarsItemTotalReviews {...business} />
           </div>
-
+          {role != "Business" &&
           <button
             type="submit"
             className="col-span-3 w-full items-center justify-center rounded-md border border-transparent bg-indigo-600 px-8 py-3 text-base font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
@@ -99,6 +142,7 @@ export default function BusinessPublic() {
           >
             Leave a review
           </button>
+          }
         </div>
 
         <div className="col-span-12">
@@ -108,26 +152,27 @@ export default function BusinessPublic() {
             {business.region} {business.city} {business.postal_code}
           </p>
           <p>Phone: {business.phone_number}</p>
-          <Swiper
-            slidesPerView={1}
-            navigation
-            pagination={{ type: "progressbar" }}
-            effect="fade"
-            modules={[EffectFade]}
-            autoplay={{ delay: 3000 }}
-          >
-            {business.imgUrls.map((url, index) => (
-              <SwiperSlide key={index}>
-                <div
-                  className="relative w-full overflow-hidden h-[300px]"
-                  style={{
-                    background: `url(${business.imgUrls[index]}) center no-repeat`,
-                    backgroundSize: "cover",
-                  }}
-                ></div>
-              </SwiperSlide>
-            ))}
-          </Swiper>
+          
+          <div>
+      <Gallery photos={business.imgUrls.map((imgUrl) => ({src: imgUrl, width:3, height:2} ) ) } onClick={openLightbox} />
+      <ModalGateway>
+        {viewerIsOpen ? (
+          <Modal onClose={closeLightbox}>
+            <Carousel
+              currentIndex={currentImage}
+              
+              views={business.imgUrls.map((imgUrl) => ({src: imgUrl, width:1, height:1} ) ) .map(x => ({
+                ...x,
+                srcset: x.srcSet,
+                caption: x.title,
+                
+              }))}
+            />
+          </Modal>
+        ) : null}
+      </ModalGateway>
+    </div>
+
         </div>
 
         <div className="col-span-12">
@@ -149,11 +194,35 @@ export default function BusinessPublic() {
             ))}
           </>
         )}
-
+        {reviewListings && reviewListings.length == 0 && (
+          <>
+            <div className="col-span-12 grid grid-cols-12">
+              <div className="col-span-4">
+                <p>
+                  No review.{" "}
+                  <a
+                    className="text-blue-600"
+                    href={`/review-submit/${params.businessId}`}
+                  >
+                    {" "}
+                    {role != "Business" &&
+                    <>Be the first one to leave a review.</>
+                    }
+                  </a>
+                </p>
+              </div>
+            </div>
+          </>
+        )}
+        <div className="col-span-12">
+          <h2 className="text-2xl font-bold tracking-tight text-gray-900 sm:text-2xl">
+            Location
+          </h2>
+        </div>
         <div className="col-span-12">
           <div className="w-full h-[200px] md:h-[400px] z-10 overflow-x-hidden mt-6 md:mt-0 md:ml-2">
             <MapContainer
-              center={[45.42690022258507, -75.6898153883481]}
+              center={[business.geolocation.lat, business.geolocation.lng]}
               zoom={13}
               scrollWheelZoom={false}
               style={{ height: "100%", width: "100%" }}
@@ -162,7 +231,9 @@ export default function BusinessPublic() {
                 attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
                 url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
               />
-              <Marker position={[45.42690022258507, -75.6898153883481]}>
+              <Marker
+                position={[business.geolocation.lat, business.geolocation.lng]}
+              >
                 <Popup>{business.street_address}</Popup>
               </Marker>
             </MapContainer>

@@ -16,7 +16,6 @@ import Spinner from "../components/Spinner";
 import { db } from "../firebase";
 import UserProfileReviewItem from "../components/UserProfileReviewItem";
 
-
 export default function UserPublic() {
   const [reviewListings, setReviewListings] = useState(null);
   useEffect(() => {
@@ -28,7 +27,7 @@ export default function UserPublic() {
         const q = query(
           listingsRef,
           where("userRef", "==", params.userProfileId),
-          orderBy("timestamp", "desc"),
+          orderBy("timestamp", "desc")
           //limit(4)
         );
         // execute the query
@@ -69,49 +68,43 @@ export default function UserPublic() {
   }
   return (
     <>
-      <div className="flex justify-between max-w-6xl mx-auto px-3 py-3 items-center">
-        <div className="flex items-baseline ">
-          <div>
+      <div className="grid grid-cols-12 gap-4 px-3 max-w-6xl mx-auto mb-12 mt-4">
+        <div className="col-span-12 grid grid-cols-12 bg-white px-8 py-8">
+          <div className="col-span-2">
+            <img
+              src={userProfile.photoUrls[0]}
+              className="object-none w-36 h-36 rounded-full"
+            />
+          </div>
+          <div className="col-span-10">
             <h1 className="text-2xl font-bold tracking-tight text-gray-900 sm:text-3xl">
               {userProfile.name}
             </h1>
-          </div>
-          <div className="px-10">
-            <h3>{reviewListings && reviewListings.length} Reviews</h3>
+            <p>{userProfile.bio}</p>
           </div>
         </div>
-        
+
+        <div className="col-span-12 grid grid-cols-12 bg-white px-8 py-8">
+          <div className="col-span-12">
+            <h2 className="text-2xl font-bold tracking-tight text-gray-900 sm:text-2xl">
+              {reviewListings && reviewListings.length} Reviews
+            </h2>
+          </div>
+          <div className="col-span-12 grid grid-cols-12 items-center ">
+            {reviewListings && reviewListings.length > 0 && (
+              <>
+                {reviewListings.map((listing) => (
+                  <UserProfileReviewItem
+                    key={listing.id}
+                    listing={listing.data}
+                    id={listing.id}
+                  />
+                ))}
+              </>
+            )}
+          </div>
+        </div>
       </div>
-      <div className="flex justify-between max-w-6xl mx-auto px-3  items-center">
-        <p>{userProfile.bio}</p>
-      </div>
-      
-
-      <div className="flex justify-between max-w-6xl mx-auto px-3  items-center">
-        <img src={userProfile.photoUrls[0]} className="h-52" />
-            </div>
-      
-      <div className="flex justify-between max-w-6xl mx-auto px-3  items-center">
-        <h2 className="text-2xl font-bold tracking-tight text-gray-900 sm:text-2xl">
-          Reviews
-        </h2>
-      </div>
-      {reviewListings && reviewListings.length > 0 && (
-
-
-
-            <ul >
-              {reviewListings.map((listing) => (
-                <UserProfileReviewItem
-                  key={listing.id}
-                  listing={listing.data}
-                  id={listing.id}
-                />
-              ))}
-            </ul>
-
-        )}
-
     </>
-  )
+  );
 }

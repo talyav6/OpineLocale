@@ -82,9 +82,10 @@ export default function CreateBusiness() {
     }
     let geolocation = {};
     let location;
+    let fullAddress =     street_address + " " + city + " " + region + " " + postal_code;
     if (geolocationEnabled) {
       const response = await fetch(
-        `https://maps.googleapis.com/maps/api/geocode/json?address=${street_address}&key=${process.env.REACT_APP_GEOCODE_API_KEY}`
+        `https://maps.googleapis.com/maps/api/geocode/json?address=${fullAddress}&key=${process.env.REACT_APP_GEOCODE_API_KEY}`
       );
       const data = await response.json();
       console.log(data);
