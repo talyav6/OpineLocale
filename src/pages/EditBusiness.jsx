@@ -10,8 +10,6 @@ import {
 import { getAuth } from "firebase/auth";
 import { v4 as uuidv4 } from "uuid";
 import {
-  addDoc,
-  collection,
   doc,
   getDoc,
   serverTimestamp,
@@ -36,6 +34,7 @@ export default function EditBusiness() {
     postal_code: "",
     phone_number: "",
     description: "",
+    keywords:"",
     first_name: "",
     last_name: "",
     latitude: 0,
@@ -51,6 +50,7 @@ export default function EditBusiness() {
     postal_code,
     phone_number,
     description,
+    keywords,
     first_name,
     last_name,
     latitude,
@@ -70,10 +70,14 @@ export default function EditBusiness() {
   useEffect(() => {
     setLoading(true);
     async function fetchBusiness() {
+
+      // retrieve the business doc that belongs to the userid
       const docRef = doc(db, "businesses", auth.currentUser.uid);
       const docSnap = await getDoc(docRef);
       if (docSnap.exists()) {
         setBusiness(docSnap.data());
+
+        // store the db data into the form data
         setFormData({ ...docSnap.data() });
         setLoading(false);
       } else {
@@ -122,7 +126,6 @@ export default function EditBusiness() {
     console.log(fullAddress);
     if (geolocationEnabled) {
       console.log(fullAddress);
-      console.log(process.env.REACT_APP_GEOCODE_API_KEY)
       const response = await fetch(
         `https://maps.googleapis.com/maps/api/geocode/json?address=${fullAddress}&key=${process.env.REACT_APP_GEOCODE_API_KEY}`
       );
@@ -189,10 +192,12 @@ export default function EditBusiness() {
       return;
     });
 
+
     const formDataCopy = {
       ...formData,
       imgUrls,
       geolocation,
+      keywords: keywords.toString().replace(/\s/g,"").split(","),
       timestamp: serverTimestamp(),
       userRef: auth.currentUser.uid,
     };
@@ -202,7 +207,9 @@ export default function EditBusiness() {
     delete formDataCopy.longitude;
     const docRef = doc(db, "businesses", auth.currentUser.uid);
 
+    // updateDoc is used to update an existing document
     await updateDoc(docRef, formDataCopy);
+
     setLoading(false);
     toast.success("Business Edited");
     navigate(`/business-public/${docRef.id}`);
@@ -218,17 +225,17 @@ export default function EditBusiness() {
         </h1>
         <div className="flex justify-center flex-wrap items-center px-6 py-4 max-w-6xl mx-auto">
           <form onSubmit={onSubmit}>
-            <div class="space-y-12">
-              <div class="border-b border-gray-900/10 pb-12">
-                <div class="mt-10 grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6">
-                  <div class="sm:col-span-4">
+            <div className="space-y-12">
+              <div className="border-b border-gray-900/10 pb-12">
+                <div className="mt-10 grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6">
+                  <div className="sm:col-span-4">
                     <label
                       for="business_name"
-                      class="block text-sm font-medium leading-6 text-gray-900"
+                      className="block text-sm font-medium leading-6 text-gray-900"
                     >
                       Business Name
                     </label>
-                    <div class="mt-2">
+                    <div className="mt-2">
                       <input
                         type="text"
                         id="business_name"
@@ -236,26 +243,26 @@ export default function EditBusiness() {
                         value={business_name}
                         onChange={onChange}
                         autocomplete="business_name"
-                        class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                        className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
                       />
                     </div>
                   </div>
 
-                  <div class="sm:col-span-3">
+                  <div className="sm:col-span-3">
                     <label
                       for="business_type"
-                      class="block text-sm font-medium leading-6 text-gray-900"
+                      className="block text-sm font-medium leading-6 text-gray-900"
                     >
                       Business Type
                     </label>
-                    <div class="mt-2">
+                    <div className="mt-2">
                       <select
                         id="business_type"
                         name="business_type"
                         value={business_type}
                         onChange={onChange}
                         autocomplete="business_type"
-                        class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:max-w-xs sm:text-sm sm:leading-6"
+                        className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:max-w-xs sm:text-sm sm:leading-6"
                       >
                         <option>Hotel</option>
                         <option>Restaurant</option>
@@ -264,14 +271,14 @@ export default function EditBusiness() {
                     </div>
                   </div>
 
-                  <div class="col-span-full">
+                  <div className="col-span-full">
                     <label
                       for="street_address"
-                      class="block text-sm font-medium leading-6 text-gray-900"
+                      className="block text-sm font-medium leading-6 text-gray-900"
                     >
                       Street address
                     </label>
-                    <div class="mt-2">
+                    <div className="mt-2">
                       <input
                         type="text"
                         name="street_address"
@@ -279,19 +286,19 @@ export default function EditBusiness() {
                         value={street_address}
                         onChange={onChange}
                         autocomplete="street_address"
-                        class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                        className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
                       />
                     </div>
                   </div>
 
-                  <div class="sm:col-span-2 sm:col-start-1">
+                  <div className="sm:col-span-2 sm:col-start-1">
                     <label
                       for="city"
-                      class="block text-sm font-medium leading-6 text-gray-900"
+                      className="block text-sm font-medium leading-6 text-gray-900"
                     >
                       City
                     </label>
-                    <div class="mt-2">
+                    <div className="mt-2">
                       <input
                         type="text"
                         name="city"
@@ -299,19 +306,19 @@ export default function EditBusiness() {
                         value={city}
                         onChange={onChange}
                         autocomplete="address-level2"
-                        class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                        className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
                       />
                     </div>
                   </div>
 
-                  <div class="sm:col-span-2">
+                  <div className="sm:col-span-2">
                     <label
                       for="region"
-                      class="block text-sm font-medium leading-6 text-gray-900"
+                      className="block text-sm font-medium leading-6 text-gray-900"
                     >
                       State / Province
                     </label>
-                    <div class="mt-2">
+                    <div className="mt-2">
                       <input
                         type="text"
                         name="region"
@@ -319,19 +326,19 @@ export default function EditBusiness() {
                         value={region}
                         onChange={onChange}
                         autocomplete="address-level1"
-                        class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                        className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
                       />
                     </div>
                   </div>
 
-                  <div class="sm:col-span-2">
+                  <div className="sm:col-span-2">
                     <label
                       for="postal_code"
-                      class="block text-sm font-medium leading-6 text-gray-900"
+                      className="block text-sm font-medium leading-6 text-gray-900"
                     >
                       ZIP / Postal code
                     </label>
-                    <div class="mt-2">
+                    <div className="mt-2">
                       <input
                         type="text"
                         name="postal_code"
@@ -339,19 +346,19 @@ export default function EditBusiness() {
                         value={postal_code}
                         onChange={onChange}
                         autocomplete="postal_code"
-                        class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                        className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
                       />
                     </div>
                   </div>
 
-                  <div class="sm:col-span-4">
+                  <div className="sm:col-span-4">
                     <label
                       for="phone-number"
-                      class="block text-sm font-medium leading-6 text-gray-900"
+                      className="block text-sm font-medium leading-6 text-gray-900"
                     >
                       Phone Number
                     </label>
-                    <div class="mt-2">
+                    <div className="mt-2">
                       <input
                         id="phone_number"
                         name="phone_number"
@@ -359,22 +366,22 @@ export default function EditBusiness() {
                         value={phone_number}
                         onChange={onChange}
                         autocomplete="phone_number"
-                        class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                        className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
                       />
                     </div>
                   </div>
 
-                  <div class="col-span-full">
+                  <div className="col-span-full">
                     <label
                       for="cover-photo"
-                      class="block text-sm font-medium leading-6 text-gray-900"
+                      className="block text-sm font-medium leading-6 text-gray-900"
                     >
                       Business photos (you can upload upto 6 photos)
                     </label>
-                    <div class="mt-2 flex justify-center rounded-lg border border-dashed border-gray-900/25 px-6 py-10">
-                      <div class="text-center">
+                    <div className="mt-2 flex justify-center rounded-lg border border-dashed border-gray-900/25 px-6 py-10">
+                      <div className="text-center">
                         <svg
-                          class="mx-auto h-12 w-12 text-gray-300"
+                          className="mx-auto h-12 w-12 text-gray-300"
                           viewBox="0 0 24 24"
                           fill="currentColor"
                           aria-hidden="true"
@@ -385,10 +392,10 @@ export default function EditBusiness() {
                             clip-rule="evenodd"
                           />
                         </svg>
-                        <div class="mt-4 flex text-sm leading-6 text-gray-600">
+                        <div className="mt-4 flex text-sm leading-6 text-gray-600">
                           <label
                             for="file-upload"
-                            class="relative cursor-pointer rounded-md bg-white font-semibold text-indigo-600 focus-within:outline-none focus-within:ring-2 focus-within:ring-indigo-600 focus-within:ring-offset-2 hover:text-indigo-500"
+                            className="relative cursor-pointer rounded-md bg-white font-semibold text-indigo-600 focus-within:outline-none focus-within:ring-2 focus-within:ring-indigo-600 focus-within:ring-offset-2 hover:text-indigo-500"
                           >
                             <span>Upload a file</span>
                             <input
@@ -401,29 +408,48 @@ export default function EditBusiness() {
                               className="w-full px-3 py-1.5 text-gray-700 bg-white border border-gray-300 rounded transition duration-150 ease-in-out focus:bg-white focus:border-slate-600"
                             />
                           </label>
-                          <p class="pl-1">or drag and drop</p>
+                          <p className="pl-1">or drag and drop</p>
                         </div>
-                        <p class="text-xs leading-5 text-gray-600">
+                        <p className="text-xs leading-5 text-gray-600">
                           PNG, JPG, GIF up to 10MB
                         </p>
                       </div>
                     </div>
                   </div>
 
-                  <div class="col-span-full">
+                  <div className="col-span-full">
                     <label
                       for="description"
-                      class="block text-sm font-medium leading-6 text-gray-900"
+                      className="block text-sm font-medium leading-6 text-gray-900"
                     >
                       Description of the place/amenities
                     </label>
-                    <div class="mt-2">
+                    <div className="mt-2">
                       <textarea
                         id="description"
                         name="description"
                         rows="3"
-                        class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                        className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
                         value={description}
+                        onChange={onChange}
+                      ></textarea>
+                    </div>
+                  </div>
+
+                  <div className="col-span-full">
+                    <label
+                      for="description"
+                      className="block text-sm font-medium leading-6 text-gray-900"
+                    >
+                      Keywords (comma separated)
+                    </label>
+                    <div className="mt-2">
+                      <textarea
+                        id="keywords"
+                        name="keywords"
+                        rows="3"
+                        className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                        value={keywords.toString()}
                         onChange={onChange}
                       ></textarea>
                     </div>
@@ -431,25 +457,25 @@ export default function EditBusiness() {
                 </div>
               </div>
 
-              <div class="border-b border-gray-900/10 pb-12">
-                <h2 class="text-base font-semibold leading-7 text-gray-900">
+              <div className="border-b border-gray-900/10 pb-12">
+                <h2 className="text-base font-semibold leading-7 text-gray-900">
                   Personal Information
                 </h2>
-                <p class="mt-1 text-sm leading-6 text-gray-600">
+                <p className="mt-1 text-sm leading-6 text-gray-600">
                   Your personal information will not be displayed on your
                   business profile.
                 </p>
 
-                <div class="col-span-full">
+                <div className="col-span-full">
                   <label
                     for="photo"
-                    class="block text-sm font-medium leading-6 text-gray-900"
+                    className="block text-sm font-medium leading-6 text-gray-900"
                   >
                     Photo
                   </label>
-                  <div class="mt-2 flex items-center gap-x-3">
+                  <div className="mt-2 flex items-center gap-x-3">
                     <svg
-                      class="h-12 w-12 text-gray-300"
+                      className="h-12 w-12 text-gray-300"
                       viewBox="0 0 24 24"
                       fill="currentColor"
                       aria-hidden="true"
@@ -462,22 +488,22 @@ export default function EditBusiness() {
                     </svg>
                     <button
                       type="button"
-                      class="rounded-md bg-white px-2.5 py-1.5 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
+                      className="rounded-md bg-white px-2.5 py-1.5 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
                     >
                       Change
                     </button>
                   </div>
                 </div>
 
-                <div class="mt-10 grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6">
-                  <div class="sm:col-span-3">
+                <div className="mt-10 grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6">
+                  <div className="sm:col-span-3">
                     <label
                       for="first_name"
-                      class="block text-sm font-medium leading-6 text-gray-900"
+                      className="block text-sm font-medium leading-6 text-gray-900"
                     >
                       First name
                     </label>
-                    <div class="mt-2">
+                    <div className="mt-2">
                       <input
                         type="text"
                         name="first_name"
@@ -485,19 +511,19 @@ export default function EditBusiness() {
                         value={first_name}
                         onChange={onChange}
                         autocomplete="given-name"
-                        class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                        className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
                       />
                     </div>
                   </div>
 
-                  <div class="sm:col-span-3">
+                  <div className="sm:col-span-3">
                     <label
                       for="last_name"
-                      class="block text-sm font-medium leading-6 text-gray-900"
+                      className="block text-sm font-medium leading-6 text-gray-900"
                     >
                       Last name
                     </label>
-                    <div class="mt-2">
+                    <div className="mt-2">
                       <input
                         type="text"
                         name="last_name"
@@ -505,7 +531,7 @@ export default function EditBusiness() {
                         value={last_name}
                         onChange={onChange}
                         autocomplete="family-name"
-                        class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                        className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
                       />
                     </div>
                   </div>
@@ -513,10 +539,10 @@ export default function EditBusiness() {
               </div>
             </div>
 
-            <div class="mt-6 flex items-center justify-end gap-x-6">
+            <div className="mt-6 flex items-center justify-end gap-x-6">
               <button
                 type="submit"
-                class="rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+                className="rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
               >
                 Save
               </button>

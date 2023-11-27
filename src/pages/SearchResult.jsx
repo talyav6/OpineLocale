@@ -30,8 +30,7 @@ export default function SearchResult() {
         const q = query(
           businessesRef,
           //where("description", "==", params.keyword),
-          where("description", ">=", params.keyword),
-          where("description", "<", params.keyword + "z")
+          where("keywords", "array-contains", params.keyword),
 
           //limit(4)
         );

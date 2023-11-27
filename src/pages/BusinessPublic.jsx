@@ -17,7 +17,6 @@ import { db } from "../firebase";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import ReviewItem from "../components/ReviewItem";
 import RatingStarsItemTotalReviews from "../components/RatingStarsItemTotalReviews";
-import { Swiper, SwiperSlide } from "swiper/react";
 import SwiperCore, {
   EffectFade,
   Autoplay,
@@ -27,24 +26,29 @@ import SwiperCore, {
 import "swiper/css/bundle";
 import { MapContainer, Marker, Popup, TileLayer } from "react-leaflet";
 
-import { render } from "react-dom";
+
 import Gallery from "react-photo-gallery";
 import Carousel, { Modal, ModalGateway } from "react-images";
 
 export default function BusinessPublic() {
   const [reviewListings, setReviewListings] = useState(null);
+  // reviewListing is used to store the reviews for a business.
+
+
   SwiperCore.use([Autoplay, Navigation, Pagination]);
   useEffect(() => {
     async function fetchListings() {
       try {
-        // get reference
+        
         const listingsRef = collection(db, "reviews");
-        // create the query
+        // create a query that selects the reviews of a business.
+        // reviews are selected if they are visible
+        // reviews are sorted by their creation time
         const q = query(
           listingsRef,
           where("businessId", "==", params.businessId),
+          where("isVisible", "==", true),
           orderBy("timestamp", "desc")
-          //limit(4)
         );
         // execute the query
         const querySnap = await getDocs(q);
@@ -55,6 +59,8 @@ export default function BusinessPublic() {
             data: doc.data(),
           });
         });
+
+        // Load the reviews into the reviewListing array
         setReviewListings(listings);
       } catch (error) {
         console.log(error);
@@ -64,17 +70,20 @@ export default function BusinessPublic() {
   }, []);
   
   const params = useParams();
-  const location = useLocation();
   const navigate = useNavigate();
   const [business, setBusiness] = useState(null);
   const [loading, setLoading] = useState(true);
   const auth = getAuth();
   const [role, setRole] = useState(null);
+  // role variable is used to manage the reply buttons in the review section
+  // Guest : not logged in
+  // User: logged in but not business
+  // Business
+
+
   useEffect(() => {
     onAuthStateChanged(auth, (user) => {
       if (user) {
-        
-
         const userRef = doc(db, "users", user.uid);
         const userSnap = getDoc(userRef).then((uitem) => {
           let role = "User";
@@ -95,6 +104,8 @@ export default function BusinessPublic() {
 
   useEffect(() => {
     async function fetchBusiness() {
+
+      // Load the business document into the business variable
       const docRef = doc(db, "businesses", params.businessId);
       const docSnap = await getDoc(docRef);
       if (docSnap.exists()) {
@@ -106,7 +117,7 @@ export default function BusinessPublic() {
   }, [params.businessId]);
 
 
-
+  // these constants are used to control the react images 
   const [currentImage, setCurrentImage] = useState(0);
   const [viewerIsOpen, setViewerIsOpen] = useState(false);
 

@@ -28,10 +28,14 @@ export default function Login() {
         email,
         password
       );
+
+      // if the user has successfully logged, the user is redirected to the home page
       if (userCredential.user) {
         navigate("/");
       }
     } catch (error) {
+
+      // if the user is not able to log in
       toast.error("Bad user credentials");
     }
   }
@@ -99,7 +103,10 @@ export default function Login() {
             <div className="flex items-center  my-4 before:border-t before:flex-1 before:border-gray-300 after:border-t after:flex-1 after:border-gray-300">
               <p className="text-center font-semibold mx-4">OR</p>
             </div>
+            
+            {/* continue with google button */}
             <OAuth />
+            
           </form>
         </div>
       </div>

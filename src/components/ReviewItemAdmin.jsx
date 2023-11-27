@@ -4,8 +4,8 @@ import { useState, useCallback } from "react";
 import { useEffect } from "react";
 import { db } from "../firebase";
 import { useNavigate } from "react-router-dom";
-import Spinner from "../components/Spinner";
-import RatingStarsItemOnlyStars from "../components/RatingStarsItemOnlyStars";
+import Spinner from "./Spinner";
+import RatingStarsItemOnlyStars from "./RatingStarsItemOnlyStars";
 import {
   updateDoc,
   addDoc,
@@ -18,49 +18,18 @@ import { getAuth, onAuthStateChanged } from "firebase/auth";
 import Gallery from "react-photo-gallery";
 import Carousel, { Modal, ModalGateway } from "react-images";
 
-export default function ReviewItem({ listing, id, onEdit, onDelete }) {
+export default function ReviewItemAdmin({ listing, id, onEdit, onDelete }) {
   const auth = getAuth();
-  const [formData, setFormData] = useState({
-    replyText: "",
-  });
-  const { replyText } = formData;
+
+  const [userProfile, setUserProfile] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
 
   const [formDataSpam, setFormDataSpam] = useState({
     spamReason: "Inappropriate Language",
   });
   const { spamReason } = formDataSpam;
 
-  const [userProfile, setUserProfile] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [replyReview, setReplyReview] = useState(false);
-  const [businessOwner, setBusinessOwner] = useState(false);
-  const navigate = useNavigate();
-  const openReview = () => {
-    setReplyReview(!replyReview);
-  };
-  function onChange(e) {
-    let boolean = null;
-    if (e.target.value === "true") {
-      boolean = true;
-    }
-    if (e.target.value === "false") {
-      boolean = false;
-    }
-    // Files
-    if (e.target.files) {
-      setFormData((prevState) => ({
-        ...prevState,
-        images: e.target.files,
-      }));
-    }
-    // Text/Boolean/Number
-    if (!e.target.files) {
-      setFormData((prevState) => ({
-        ...prevState,
-        [e.target.id]: boolean ?? e.target.value,
-      }));
-    }
-  }
 
   function onChangeSpam(e) {
     let boolean = null;
@@ -86,24 +55,8 @@ export default function ReviewItem({ listing, id, onEdit, onDelete }) {
     }
   }
 
-  async function onSubmit(e) {
-    e.preventDefault();
-    setLoading(true);
 
-    const formDataCopy = {
-      ...formData,
-      isReplied: true,
-      replyDate: serverTimestamp(),
-    };
-
-    const docRef = doc(db, "reviews", id);
-    await updateDoc(docRef, formDataCopy);
-
-    setLoading(false);
-    toast.success("Review replied");
-    navigate(0);
-  }
-
+  
   async function onSubmitSpam(e) {
     setLoading(true);
 
@@ -132,7 +85,35 @@ export default function ReviewItem({ listing, id, onEdit, onDelete }) {
 
     setLoading(false);
     toast.success("Reported as spam");
-    navigate(0);
+    navigate(`/business-public/${listing.businessId}`);
+  }
+
+  async function onDelete() {
+    setLoading(true);
+
+    const formDataCopy = {
+      isVisible: false,
+    };
+    const docRef = doc(db, "reviews", id);
+    await updateDoc(docRef, formDataCopy);
+
+    setLoading(false);
+    toast.success("Review deleted");
+    navigate(`/business-public/${listing.businessId}`);
+  }
+
+  async function onUnDelete() {
+    setLoading(true);
+
+    const formDataCopy = {
+      isVisible: true,
+    };
+    const docRef = doc(db, "reviews", id);
+    await updateDoc(docRef, formDataCopy);
+
+    setLoading(false);
+    toast.success("Review undeleted");
+    navigate(`/business-public/${listing.businessId}`);
   }
 
   useEffect(() => {
@@ -160,16 +141,6 @@ export default function ReviewItem({ listing, id, onEdit, onDelete }) {
     setViewerIsOpen(false);
   };
 
-  useEffect(() => {
-    onAuthStateChanged(auth, (user) => {
-      if (user && user.uid == listing.businessId) {
-        setBusinessOwner(true);
-      } else {
-        setBusinessOwner(false);
-      }
-    });
-  }, [auth]);
-
   if (loading) {
     return <Spinner />;
   }
@@ -178,8 +149,12 @@ export default function ReviewItem({ listing, id, onEdit, onDelete }) {
       <div className="col-span-12 grid grid-cols-12  shadow-md px-2 py-2">
         <div className="col-span-4">
           <a href={`/user-public/${listing.userRef}`}>
-            {userProfile.name} ({listing.review_date})
-          </a>
+            {userProfile.name} </a>
+            <p>Visit Date: {listing.review_date}</p>
+            <p>Review Date: {listing.timestamp.toDate().toDateString()}</p>
+            
+
+          
           <RatingStarsItemOnlyStars {...listing} />
 
           <p>{listing.review}</p>
@@ -211,15 +186,10 @@ export default function ReviewItem({ listing, id, onEdit, onDelete }) {
             ) : null}
           </ModalGateway>
         </div>
-        {businessOwner && (
-          <>
-            <div className="col-start-10 col-span-1">
-              <a onClick={openReview} className="cursor-pointer text-green-600">
-                Reply
-              </a>
-            </div>
-            {!listing.reportedAsSpam && (
-              <>
+
+        {!listing.reportedAsSpam && (
+          <div className="col-span-2">
+<>
                 <form
                   onSubmit={onSubmitSpam}
                   className=" col-span-2 grid grid-cols-2  "
@@ -237,7 +207,6 @@ export default function ReviewItem({ listing, id, onEdit, onDelete }) {
                       <option>Biased review</option>
                       <option>Review is not consistent with rating</option>
                       <option>Something else</option>
-
                     </select>
                   </div>
                   <div className="col-span-2">
@@ -250,22 +219,53 @@ export default function ReviewItem({ listing, id, onEdit, onDelete }) {
                   </div>
                 </form>
               </>
-              // <div className="col-start-11 col-span-2">
-              //   <a onClick={onReportAsSpam} className="cursor-pointer text-orange-500">Report As Spam</a>
-              // </div>
-            )}
-            {listing.reportedAsSpam && (
-              <div className="col-start-11 col-span-2">
-                <a
-                  onClick={onReportAsNotSpam}
-                  className="cursor-pointer text-orange-500"
-                >
-                  This is not Spam
-                </a>
-              </div>
-            )}
-          </>
+          </div>
         )}
+        {listing.reportedAsSpam && (
+          <div className="col-span-2">
+            <p>Marked as spam</p>
+            <p>{listing.spamReason}</p>
+            <a
+              onClick={onReportAsNotSpam}
+              className="cursor-pointer text-orange-500"
+            >
+              This is not Spam
+            </a>
+          </div>
+        )}
+
+      <div className="col-span-1 px-2">
+        
+        {listing.trollDetected && (
+          <p>Troll Detected</p>
+        )}
+      </div>
+
+
+        
+      {listing.isVisible && (
+          <div className="col-span-1">
+            <a
+              onClick={onDelete}
+              className="cursor-pointer text-orange-500"
+            >
+              Delete
+            </a>
+          </div>
+        )}
+        
+        {!listing.isVisible && (
+          <div className="col-span-1">
+            <p>This review is deleted.</p>
+            <a
+              onClick={onUnDelete}
+              className="cursor-pointer text-orange-500"
+            >
+              Undelete
+            </a>
+          </div>
+        )}
+
 
         {listing.isReplied && (
           <div className="col-start-2 col-span-4">
@@ -275,36 +275,6 @@ export default function ReviewItem({ listing, id, onEdit, onDelete }) {
             </h2>
             <p>"{listing.replyText}"</p>
           </div>
-        )}
-
-        {replyReview && businessOwner && (
-          <>
-            <form
-              onSubmit={onSubmit}
-              className=" col-span-12 grid grid-cols-12 mt-4 "
-            >
-              <div className="col-span-6">
-                <textarea
-                  id="replyText"
-                  name="replyText"
-                  rows="3"
-                  placeholder="Write your reply here!"
-                  className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
-                  value={replyText}
-                  onChange={onChange}
-                ></textarea>
-              </div>
-
-              <div className="col-start-6 col-span-1">
-                <button
-                  type="submit"
-                  className="rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
-                >
-                  Reply
-                </button>
-              </div>
-            </form>
-          </>
         )}
       </div>
     </>

@@ -19,6 +19,7 @@ import EditBusiness from "./pages/EditBusiness";
 import BusinessPublic from "./pages/BusinessPublic";
 import Settings from "./pages/Settings";
 import Recommendation from "./pages/Recommendation";
+import AdminManageReviews from "./pages/AdminManageReviews";
 import Map from "./pages/Map";
 
 
@@ -39,6 +40,12 @@ function App() {
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/search" element={<Search />} />
           <Route path="/search-result/:keyword" element={<SearchResult />} />
+
+
+          <Route path="admin-manage-reviews" element={<PrivateRoute />}>
+            <Route path="/admin-manage-reviews" element={<AdminManageReviews />} />
+          </Route>
+
           <Route path="review-submit" element={<PrivateRoute />}>
             <Route path="/review-submit/:businessId" element={<ReviewSubmit />} />
           </Route>

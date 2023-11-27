@@ -27,6 +27,7 @@ export default function UserPublic() {
         const q = query(
           listingsRef,
           where("userRef", "==", params.userProfileId),
+          where("isVisible", "==", true),
           orderBy("timestamp", "desc")
           //limit(4)
         );

@@ -9,7 +9,6 @@ import {
 } from "firebase/auth";
 import { db } from "../firebase";
 import { doc, serverTimestamp, setDoc } from "firebase/firestore";
-import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 
 export default function SignUp() {
@@ -18,10 +17,10 @@ export default function SignUp() {
     name: "",
     email: "",
     password: "",
+    photoUrls: [],
     role: "",
   });
-  const { name, email, password,role } = formData;
-  const navigate = useNavigate();
+  const { name, email, password,role, photoUrls } = formData;
   function onChange(e) {
     setFormData((prevState) => ({
       ...prevState,
@@ -33,6 +32,8 @@ export default function SignUp() {
 
     try {
       const auth = getAuth();
+
+      // The user is registered first in the Authantication module of the firebase.
       const userCredential = await createUserWithEmailAndPassword(
         auth,
         email,
@@ -43,6 +44,9 @@ export default function SignUp() {
       updateProfile(auth.currentUser, {
         displayName: name,
       });
+
+      // the user is also registered in the firestore Database under the users collection.
+      // The role of this user ("User","Admin","Business") is stored in the db.
       const user = userCredential.user;
       const formDataCopy = { ...formData,
       };

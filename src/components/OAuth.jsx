@@ -25,6 +25,7 @@ export default function OAuth() {
           bio: "",
           photo: "",
           role: "User",
+          photoUrls: [],
           timestamp: serverTimestamp(),
         });
       }

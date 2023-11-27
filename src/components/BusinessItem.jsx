@@ -14,7 +14,7 @@ export default function BusinessItem({ listing, id, onEdit, onDelete }) {
       <div className="mt-2">
         <img
           src={listing.imgUrls[0]}
-          className="h-42"
+          className="h-80 w-96 object-cover"
           onClick={() => navigate(`/business-public/${id}`)}
         />
       </div>

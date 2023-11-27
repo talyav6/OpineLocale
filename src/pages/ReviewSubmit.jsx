@@ -38,6 +38,9 @@ export default function ReviewSubmit() {
     reportedAsSpam: false,
     isVisible: true,
     replyText: "",
+    reportReason: "",
+    trollDetected: false,
+    spamReason: "",
    });
   const { title, review, images,   isReplied,
     reportedAsSpam,
