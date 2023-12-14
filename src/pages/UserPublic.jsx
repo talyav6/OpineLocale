@@ -73,8 +73,8 @@ export default function UserPublic() {
         <div className="col-span-12 grid grid-cols-12 bg-white px-8 py-8">
           <div className="col-span-2">
             <img
-              src={userProfile.photoUrls[0]}
-              className="object-none w-36 h-36 rounded-full"
+              src={userProfile.photoUrls[0] ? userProfile.photoUrls[0] : "/nophoto.png"}
+              className=" w-36 h-36 "
             />
           </div>
           <div className="col-span-10">

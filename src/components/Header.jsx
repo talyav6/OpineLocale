@@ -85,7 +85,7 @@ export default function Header() {
       <header className="flex justify-between items-center px-3 max-w-6xl mx-auto">
         <div>
         <img
-            src="logo1.png"
+            src="/logo1.png"
             alt="logo"
             className="h-12 cursor-pointer"
             onClick={() => navigate("/")}
@@ -116,7 +116,9 @@ export default function Header() {
             {pageState == "business-edit" && (
               <>
                 <li
-                  className={`cursor-pointer py-3 text-sm font-semibold text-gray-400 border-b-[3px] border-b-transparent `}
+                  className={`cursor-pointer py-3 text-sm font-semibold text-gray-400 border-b-[3px] border-b-transparent ${
+                    pathMatchRoute(`/business-public/${businessIdState}`) && "!text-black !border-b-red-500"
+                  }`}
                   onClick={() =>
                     navigate(`business-public/${businessIdState}`)
                   }
@@ -128,13 +130,17 @@ export default function Header() {
             {pageState == "user" && (
               <>
               <li
-                  className={`cursor-pointer py-3 text-sm font-semibold text-gray-400 border-b-[3px] border-b-transparent `}
+                  className={`cursor-pointer py-3 text-sm font-semibold text-gray-400 border-b-[3px] border-b-transparent ${
+                    pathMatchRoute(`/user-public/${businessIdState}`) && "!text-black !border-b-red-500"
+                  }`}
                   onClick={() => navigate(`/user-public/${businessIdState}`)}
                 >
                   Your Profile
                 </li>
                 <li
-                  className={`cursor-pointer py-3 text-sm font-semibold text-gray-400 border-b-[3px] border-b-transparent `}
+                  className={`cursor-pointer py-3 text-sm font-semibold text-gray-400 border-b-[3px] border-b-transparent ${
+                    pathMatchRoute(`/edit-user-profile`) && "!text-black !border-b-red-500"
+                  }`}
                   onClick={() => navigate(`/edit-user-profile`)}
                 >
                   Manage Your Profile

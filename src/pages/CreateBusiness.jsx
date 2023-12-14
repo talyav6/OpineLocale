@@ -4,25 +4,40 @@ import { toast } from "react-toastify";
 import {
   getStorage,
   ref,
-  uploadBytesResumable,
+  uploadString,
   getDownloadURL,
 } from "firebase/storage";
 import { getAuth } from "firebase/auth";
 import { v4 as uuidv4 } from "uuid";
-import { addDoc, setDoc,collection, doc, serverTimestamp } from "firebase/firestore";
+import {
+  addDoc,
+  setDoc,
+  collection,
+  doc,
+  serverTimestamp,
+} from "firebase/firestore";
 import { db } from "../firebase";
 import { useNavigate } from "react-router-dom";
+import FileSelector from "../components/FileSelector";
 
 export default function CreateBusiness() {
+  const [imgAfterCrop0, setImgAfterCrop0] = useState(null);
+  const [imgAfterCrop1, setImgAfterCrop1] = useState(null);
+  const [imgAfterCrop2, setImgAfterCrop2] = useState(null);
+  const [imgAfterCrop3, setImgAfterCrop3] = useState(null);
+  const [imgAfterCrop4, setImgAfterCrop4] = useState(null);
+  const [imgAfterCrop5, setImgAfterCrop5] = useState(null);
+
+  const [photoAfterCrop0, setPhotoAfterCrop0] = useState(null);
+
   const navigate = useNavigate();
   const auth = getAuth();
-  
+
   const [geolocationEnabled, setGeolocationEnabled] = useState(true);
   // this is to use the geocoding api or not
 
   const [loading, setLoading] = useState(false);
   // this is to activate the spinner , when the page is busy the spinner is activated, when it is done, spinner is stopped.
-
 
   const [formData, setFormData] = useState({
     business_name: "",
@@ -33,7 +48,7 @@ export default function CreateBusiness() {
     postal_code: "",
     phone_number: "",
     description: "",
-    keywords:"",
+    keywords: "",
     first_name: "",
     last_name: "",
     latitude: 0,
@@ -56,7 +71,7 @@ export default function CreateBusiness() {
     longitude,
     images,
   } = formData;
-  
+
   function onChange(e) {
     let boolean = null;
     if (e.target.value === "true") {
@@ -85,18 +100,12 @@ export default function CreateBusiness() {
     e.preventDefault();
     setLoading(true);
 
-    if (images.length > 6) {
-      setLoading(false);
-      toast.error("maximum 6 images are allowed");
-      return;
-    }
-
     let geolocation = {};
     let location;
-    
-    let fullAddress =     street_address + " " + city + " " + region + " " + postal_code;
-    // this is the address to be sent to the geocoding api
 
+    let fullAddress =
+      street_address + " " + city + " " + region + " " + postal_code;
+    // this is the address to be sent to the geocoding api
 
     // get the coordinates of the address from the geocoding api
     if (geolocationEnabled) {
@@ -121,64 +130,60 @@ export default function CreateBusiness() {
     }
 
     // this function is used to upload an image to our firebase storage system.
+
     async function storeImage(image) {
       return new Promise((resolve, reject) => {
         const storage = getStorage();
-        const filename = `${auth.currentUser.uid}-${image.name}-${uuidv4()}`;
+
+        const filename = `${auth.currentUser.uid}-${uuidv4()}`;
         const storageRef = ref(storage, filename);
-        const uploadTask = uploadBytesResumable(storageRef, image);
-        uploadTask.on(
-          "state_changed",
-          (snapshot) => {
-            const progress =
-              (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-            console.log("Upload is " + progress + "% done");
-            switch (snapshot.state) {
-              case "paused":
-                console.log("Upload is paused");
-                break;
-              case "running":
-                console.log("Upload is running");
-                break;
-            }
-          },
-          (error) => {
-            // Handle unsuccessful uploads
-            reject(error);
-          },
-          () => {
-            getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
-              resolve(downloadURL);
-            });
-          }
-        );
+
+        uploadString(storageRef, image, "data_url").then((snapshot) => {
+          getDownloadURL(snapshot.ref).then((downloadURL) => {
+            resolve(downloadURL);
+          });
+        });
       });
     }
 
-    // this part is to upload all the image files to the system.
-    // and the resulting image urls are stored in imgUrls variable
-    const imgUrls = await Promise.all(
-      [...images].map((image) => storeImage(image))
-    ).catch((error) => {
+    var imgUrls = [];
+    if (imgAfterCrop0) {
+      imgUrls.push(await storeImage(imgAfterCrop0));
+    }
+    if (imgAfterCrop1) {
+      imgUrls.push(await storeImage(imgAfterCrop1));
+    }
+    if (imgAfterCrop2) {
+      imgUrls.push(await storeImage(imgAfterCrop2));
+    }
+    if (imgAfterCrop3) {
+      imgUrls.push(await storeImage(imgAfterCrop3));
+    }
+    if (imgAfterCrop4) {
+      imgUrls.push(await storeImage(imgAfterCrop4));
+    }
+    if (imgAfterCrop5) {
+      imgUrls.push(await storeImage(imgAfterCrop5));
+    }
+
+    var photoUrls = [];
+    if (photoAfterCrop0) {
+      photoUrls.push(await storeImage(photoAfterCrop0));
+    }
+
+
+    if (imgUrls.length < 2) {
       setLoading(false);
-      toast.error("Images not uploaded");
+      toast.error("you must upload at least 2 images");
       return;
-    });
-
-    // extra fields added to the form
-    // imgUrls: retrieved from the firebase storage app
-    // geolocation: retrieved from geocoding api
-    // timestamp : the time user has saved the form
-    // keywords: keywords should converted from string to an array of strings splitted by the comma value
-      // this is necessary for the search function to work.
-      // userRef: this is the userid
-
+    }
     const formDataCopy = {
       ...formData,
       imgUrls,
+      photoUrls,
       geolocation,
       timestamp: serverTimestamp(),
-      keywords: keywords.toString().replace(/\s/g,"").split(","),
+      keywords: keywords.toString().replace(/\s/g, "").split(","),
       userRef: auth.currentUser.uid,
       sum_of_ratings: 0,
       total_number_of_ratings: 0,
@@ -186,7 +191,7 @@ export default function CreateBusiness() {
     delete formDataCopy.images;
     delete formDataCopy.latitude;
     delete formDataCopy.longitude;
-    
+
     // insert this data to the businesses collection
     const docRef = doc(collection(db, "businesses"), auth.currentUser.uid);
 
@@ -194,8 +199,9 @@ export default function CreateBusiness() {
     await setDoc(docRef, formDataCopy);
     setLoading(false);
     toast.success("Business created");
-
+    
     navigate(`/business-public/${docRef.id}`);
+    window.location.reload(false);
   }
 
   if (loading) {
@@ -207,6 +213,7 @@ export default function CreateBusiness() {
         <h1 className="text-3xl text-center mt-6 font-bold">
           Create your Business!
         </h1>
+
         <div className="flex justify-center flex-wrap items-center px-6 py-4 max-w-6xl mx-auto">
           <form onSubmit={onSubmit}>
             <div className="space-y-12">
@@ -362,43 +369,6 @@ export default function CreateBusiness() {
                     >
                       Business photos (you can upload upto 6 photos)
                     </label>
-                    <div className="mt-2 flex justify-center rounded-lg border border-dashed border-gray-900/25 px-6 py-10">
-                      <div className="text-center">
-                        <svg
-                          className="mx-auto h-12 w-12 text-gray-300"
-                          viewBox="0 0 24 24"
-                          fill="currentColor"
-                          aria-hidden="true"
-                        >
-                          <path
-                            fill-rule="evenodd"
-                            d="M1.5 6a2.25 2.25 0 012.25-2.25h16.5A2.25 2.25 0 0122.5 6v12a2.25 2.25 0 01-2.25 2.25H3.75A2.25 2.25 0 011.5 18V6zM3 16.06V18c0 .414.336.75.75.75h16.5A.75.75 0 0021 18v-1.94l-2.69-2.689a1.5 1.5 0 00-2.12 0l-.88.879.97.97a.75.75 0 11-1.06 1.06l-5.16-5.159a1.5 1.5 0 00-2.12 0L3 16.061zm10.125-7.81a1.125 1.125 0 112.25 0 1.125 1.125 0 01-2.25 0z"
-                            clip-rule="evenodd"
-                          />
-                        </svg>
-                        <div className="mt-4 flex text-sm leading-6 text-gray-600">
-                          <label
-                            for="file-upload"
-                            className="relative cursor-pointer rounded-md bg-white font-semibold text-indigo-600 focus-within:outline-none focus-within:ring-2 focus-within:ring-indigo-600 focus-within:ring-offset-2 hover:text-indigo-500"
-                          >
-                            <span>Upload a file</span>
-                            <input
-                              type="file"
-                              id="images"
-                              onChange={onChange}
-                              accept=".jpg,.png,.jpeg"
-                              multiple
-                              required
-                              className="w-full px-3 py-1.5 text-gray-700 bg-white border border-gray-300 rounded transition duration-150 ease-in-out focus:bg-white focus:border-slate-600"
-                            />
-                          </label>
-                          <p className="pl-1">or drag and drop</p>
-                        </div>
-                        <p className="text-xs leading-5 text-gray-600">
-                          PNG, JPG, GIF up to 10MB
-                        </p>
-                      </div>
-                    </div>
                   </div>
 
                   <div className="col-span-full">
@@ -438,6 +408,25 @@ export default function CreateBusiness() {
                       ></textarea>
                     </div>
                   </div>
+
+                  <div className="col-span-full bg-stone-200 ">
+                    <FileSelector sCrop={setImgAfterCrop0} img="/noimage.png" />
+                  </div>
+                  <div className="col-span-full bg-stone-50">
+                    <FileSelector sCrop={setImgAfterCrop1} img="/noimage.png" />
+                  </div>
+                  <div className="col-span-full bg-stone-200">
+                    <FileSelector sCrop={setImgAfterCrop2} img="/noimage.png" />
+                  </div>
+                  <div className="col-span-full bg-stone-50">
+                    <FileSelector sCrop={setImgAfterCrop3} img="/noimage.png" />
+                  </div>
+                  <div className="col-span-full bg-stone-200">
+                    <FileSelector sCrop={setImgAfterCrop4} img="/noimage.png" />
+                  </div>
+                  <div className="col-span-full bg-stone-50">
+                    <FileSelector sCrop={setImgAfterCrop5} img="/noimage.png" />
+                  </div>
                 </div>
               </div>
 
@@ -457,25 +446,8 @@ export default function CreateBusiness() {
                   >
                     Photo
                   </label>
-                  <div className="mt-2 flex items-center gap-x-3">
-                    <svg
-                      className="h-12 w-12 text-gray-300"
-                      viewBox="0 0 24 24"
-                      fill="currentColor"
-                      aria-hidden="true"
-                    >
-                      <path
-                        fill-rule="evenodd"
-                        d="M18.685 19.097A9.723 9.723 0 0021.75 12c0-5.385-4.365-9.75-9.75-9.75S2.25 6.615 2.25 12a9.723 9.723 0 003.065 7.097A9.716 9.716 0 0012 21.75a9.716 9.716 0 006.685-2.653zm-12.54-1.285A7.486 7.486 0 0112 15a7.486 7.486 0 015.855 2.812A8.224 8.224 0 0112 20.25a8.224 8.224 0 01-5.855-2.438zM15.75 9a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z"
-                        clip-rule="evenodd"
-                      />
-                    </svg>
-                    <button
-                      type="button"
-                      className="rounded-md bg-white px-2.5 py-1.5 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
-                    >
-                      Change
-                    </button>
+                  <div className="col-span-full bg-stone-200 ">
+                    <FileSelector sCrop={setPhotoAfterCrop0} img="/nophoto.png" />
                   </div>
                 </div>
 

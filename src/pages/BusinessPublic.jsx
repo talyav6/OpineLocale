@@ -164,7 +164,7 @@ export default function BusinessPublic() {
           </p>
           <p>Phone: {business.phone_number}</p>
           
-          <div>
+          <div >
       <Gallery photos={business.imgUrls.map((imgUrl) => ({src: imgUrl, width:3, height:2} ) ) } onClick={openLightbox} />
       <ModalGateway>
         {viewerIsOpen ? (

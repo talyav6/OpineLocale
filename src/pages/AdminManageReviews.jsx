@@ -33,10 +33,11 @@ export default function AdminManageReviews() {
 
   const [formDataFilter, setFormDataFilter] = useState({
     reviewStatus: searchParams.get("reviewStatus"),
+    spamStatus: searchParams.get("spamStatus"),
     trollStatus: searchParams.get("trollStatus"),
     userN: searchParams.get("userName"),
   });
-  const { reviewStatus, trollStatus, userN, } = formDataFilter;
+  const { spamStatus, reviewStatus, trollStatus, userN, } = formDataFilter;
 
   var dateFromData = new Date();
   if (searchParams.get("dateFrom") !== "") {
@@ -167,6 +168,14 @@ export default function AdminManageReviews() {
           constraints.push(where("userRef", "==", uselectedId));
         }
 
+        if (searchParams.get("spamStatus") === "Spam") {
+          constraints.push(where("reportedAsSpam", "==", true));
+        }
+
+        if (searchParams.get("spamStatus") === "NotSpam") {
+          constraints.push(where("reportedAsSpam", "==", false));
+        }
+
         if (searchParams.get("reviewStatus") === "Live") {
           constraints.push(where("isVisible", "==", true));
         }
@@ -221,8 +230,11 @@ export default function AdminManageReviews() {
         onSubmit={onSubmitFilter}
         className="grid grid-cols-12 gap-4 px-3 max-w-6xl mx-auto mb-12 mt-4"
       >
-        <h1 className="col-span-2">
-          Spam Status
+        <h1 className="col-span-1">
+          Spam
+        </h1>
+        <h1 className="col-span-1">
+          Review 
         </h1>
         <h1 className="col-span-2">
           Troll Status
@@ -236,7 +248,20 @@ export default function AdminManageReviews() {
         <h1 className="col-span-2">
           To Date
         </h1>
-        <div className="col-span-2">
+        <div className="col-span-1">
+          <select
+            id="spamStatus"
+            name="spamStatus"
+            value={spamStatus}
+            onChange={onChangeFilter}
+            className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:max-w-xs sm:text-sm sm:leading-6"
+          >
+            <option>All</option>
+            <option>Spam</option>
+            <option>NotSpam</option>
+          </select>
+        </div>
+        <div className="col-span-1">
           <select
             id="reviewStatus"
             name="reviewStatus"

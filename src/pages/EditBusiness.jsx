@@ -4,22 +4,27 @@ import { toast } from "react-toastify";
 import {
   getStorage,
   ref,
-  uploadBytesResumable,
+  uploadString,
   getDownloadURL,
 } from "firebase/storage";
 import { getAuth } from "firebase/auth";
 import { v4 as uuidv4 } from "uuid";
-import {
-  doc,
-  getDoc,
-  serverTimestamp,
-  updateDoc,
-} from "firebase/firestore";
+import { doc, getDoc, serverTimestamp, updateDoc } from "firebase/firestore";
 import { db } from "../firebase";
 import { useNavigate, useParams } from "react-router-dom";
 import { useEffect } from "react";
+import FileSelector from "../components/FileSelector";
 
 export default function EditBusiness() {
+  const [imgAfterCrop0, setImgAfterCrop0] = useState(null);
+  const [imgAfterCrop1, setImgAfterCrop1] = useState(null);
+  const [imgAfterCrop2, setImgAfterCrop2] = useState(null);
+  const [imgAfterCrop3, setImgAfterCrop3] = useState(null);
+  const [imgAfterCrop4, setImgAfterCrop4] = useState(null);
+  const [imgAfterCrop5, setImgAfterCrop5] = useState(null);
+
+  const [photoAfterCrop0, setPhotoAfterCrop0] = useState(null);
+
   const navigate = useNavigate();
   const auth = getAuth();
   const [geolocationEnabled, setGeolocationEnabled] = useState(true);
@@ -34,11 +39,13 @@ export default function EditBusiness() {
     postal_code: "",
     phone_number: "",
     description: "",
-    keywords:"",
+    keywords: "",
     first_name: "",
     last_name: "",
     latitude: 0,
     longitude: 0,
+    imgUrls: {},
+    photoUrls: {},
     images: {},
   });
   const {
@@ -55,6 +62,8 @@ export default function EditBusiness() {
     last_name,
     latitude,
     longitude,
+    imgUrls,
+    photoUrls,
     images,
   } = formData;
 
@@ -70,7 +79,6 @@ export default function EditBusiness() {
   useEffect(() => {
     setLoading(true);
     async function fetchBusiness() {
-
       // retrieve the business doc that belongs to the userid
       const docRef = doc(db, "businesses", auth.currentUser.uid);
       const docSnap = await getDoc(docRef);
@@ -114,18 +122,14 @@ export default function EditBusiness() {
   async function onSubmit(e) {
     e.preventDefault();
     setLoading(true);
-    
-    if (images.length > 6) {
-      setLoading(false);
-      toast.error("maximum 6 images are allowed");
-      return;
-    }
+
     let geolocation = {};
     let location;
-    let fullAddress =     street_address + " " + city + " " + region + " " + postal_code;
-    console.log(fullAddress);
+
+    let fullAddress =
+      street_address + " " + city + " " + region + " " + postal_code;
+
     if (geolocationEnabled) {
-      console.log(fullAddress);
       const response = await fetch(
         `https://maps.googleapis.com/maps/api/geocode/json?address=${fullAddress}&key=${process.env.REACT_APP_GEOCODE_API_KEY}`
       );
@@ -142,69 +146,76 @@ export default function EditBusiness() {
         return;
       }
     } else {
-      geolocation.lat = latitude;
-      geolocation.lng = longitude;
+      geolocation.lat = 0;
+      geolocation.lng = 0;
     }
 
     async function storeImage(image) {
       return new Promise((resolve, reject) => {
         const storage = getStorage();
-        const filename = `${auth.currentUser.uid}-${image.name}-${uuidv4()}`;
+
+        const filename = `${auth.currentUser.uid}-${uuidv4()}`;
         const storageRef = ref(storage, filename);
-        const uploadTask = uploadBytesResumable(storageRef, image);
-        uploadTask.on(
-          "state_changed",
-          (snapshot) => {
-            // Observe state change events such as progress, pause, and resume
-            // Get task progress, including the number of bytes uploaded and the total number of bytes to be uploaded
-            const progress =
-              (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-            console.log("Upload is " + progress + "% done");
-            switch (snapshot.state) {
-              case "paused":
-                console.log("Upload is paused");
-                break;
-              case "running":
-                console.log("Upload is running");
-                break;
-            }
-          },
-          (error) => {
-            // Handle unsuccessful uploads
-            reject(error);
-          },
-          () => {
-            // Handle successful uploads on complete
-            // For instance, get the download URL: https://firebasestorage.googleapis.com/...
-            getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
-              resolve(downloadURL);
-            });
-          }
-        );
+
+        uploadString(storageRef, image, "data_url").then((snapshot) => {
+          getDownloadURL(snapshot.ref).then((downloadURL) => {
+            resolve(downloadURL);
+          });
+        });
       });
     }
+    var imgUrlsTemp = [];
+    if (imgAfterCrop0) {
+      imgUrlsTemp.push(await storeImage(imgAfterCrop0));
+    } else if (imgUrls[0]) {
+      imgUrlsTemp.push(imgUrls[0]);
+    }
+    if (imgAfterCrop1) {
+      imgUrlsTemp.push(await storeImage(imgAfterCrop1));
+    } else if (imgUrls[1]) {
+      imgUrlsTemp.push(imgUrls[1]);
+    }
+    if (imgAfterCrop2) {
+      imgUrlsTemp.push(await storeImage(imgAfterCrop2));
+    } else if (imgUrls[2]) {
+      imgUrlsTemp.push(imgUrls[2]);
+    }
+    if (imgAfterCrop3) {
+      imgUrlsTemp.push(await storeImage(imgAfterCrop3));
+    } else if (imgUrls[3]) {
+      imgUrlsTemp.push(imgUrls[3]);
+    }
+    if (imgAfterCrop4) {
+      imgUrlsTemp.push(await storeImage(imgAfterCrop4));
+    } else if (imgUrls[4]) {
+      imgUrlsTemp.push(imgUrls[4]);
+    }
+    if (imgAfterCrop5) {
+      imgUrlsTemp.push(await storeImage(imgAfterCrop5));
+    } else if (imgUrls[5]) {
+      imgUrlsTemp.push(imgUrls[5]);
+    }
 
-    const imgUrls = await Promise.all(
-      [...images].map((image) => storeImage(image))
-    ).catch((error) => {
-      setLoading(false);
-      toast.error("Images not uploaded");
-      return;
-    });
-
+    var photoUrlsTemp = [];
+    if (photoAfterCrop0) {
+      photoUrlsTemp.push(await storeImage(photoAfterCrop0));
+    } else if (photoUrls[0]) {
+      photoUrlsTemp.push(photoUrls[0]);
+    }
 
     const formDataCopy = {
       ...formData,
-      imgUrls,
+      imgUrls: imgUrlsTemp,
+      photoUrls: photoUrlsTemp,
       geolocation,
-      keywords: keywords.toString().replace(/\s/g,"").split(","),
+      keywords: keywords.toString().replace(/\s/g, "").split(","),
       timestamp: serverTimestamp(),
       userRef: auth.currentUser.uid,
     };
     delete formDataCopy.images;
-    !formDataCopy.offer && delete formDataCopy.discountedPrice;
     delete formDataCopy.latitude;
     delete formDataCopy.longitude;
+
     const docRef = doc(db, "businesses", auth.currentUser.uid);
 
     // updateDoc is used to update an existing document
@@ -373,52 +384,6 @@ export default function EditBusiness() {
 
                   <div className="col-span-full">
                     <label
-                      for="cover-photo"
-                      className="block text-sm font-medium leading-6 text-gray-900"
-                    >
-                      Business photos (you can upload upto 6 photos)
-                    </label>
-                    <div className="mt-2 flex justify-center rounded-lg border border-dashed border-gray-900/25 px-6 py-10">
-                      <div className="text-center">
-                        <svg
-                          className="mx-auto h-12 w-12 text-gray-300"
-                          viewBox="0 0 24 24"
-                          fill="currentColor"
-                          aria-hidden="true"
-                        >
-                          <path
-                            fill-rule="evenodd"
-                            d="M1.5 6a2.25 2.25 0 012.25-2.25h16.5A2.25 2.25 0 0122.5 6v12a2.25 2.25 0 01-2.25 2.25H3.75A2.25 2.25 0 011.5 18V6zM3 16.06V18c0 .414.336.75.75.75h16.5A.75.75 0 0021 18v-1.94l-2.69-2.689a1.5 1.5 0 00-2.12 0l-.88.879.97.97a.75.75 0 11-1.06 1.06l-5.16-5.159a1.5 1.5 0 00-2.12 0L3 16.061zm10.125-7.81a1.125 1.125 0 112.25 0 1.125 1.125 0 01-2.25 0z"
-                            clip-rule="evenodd"
-                          />
-                        </svg>
-                        <div className="mt-4 flex text-sm leading-6 text-gray-600">
-                          <label
-                            for="file-upload"
-                            className="relative cursor-pointer rounded-md bg-white font-semibold text-indigo-600 focus-within:outline-none focus-within:ring-2 focus-within:ring-indigo-600 focus-within:ring-offset-2 hover:text-indigo-500"
-                          >
-                            <span>Upload a file</span>
-                            <input
-                              type="file"
-                              id="images"
-                              onChange={onChange}
-                              accept=".jpg,.png,.jpeg"
-                              multiple
-                              required
-                              className="w-full px-3 py-1.5 text-gray-700 bg-white border border-gray-300 rounded transition duration-150 ease-in-out focus:bg-white focus:border-slate-600"
-                            />
-                          </label>
-                          <p className="pl-1">or drag and drop</p>
-                        </div>
-                        <p className="text-xs leading-5 text-gray-600">
-                          PNG, JPG, GIF up to 10MB
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="col-span-full">
-                    <label
                       for="description"
                       className="block text-sm font-medium leading-6 text-gray-900"
                     >
@@ -454,6 +419,92 @@ export default function EditBusiness() {
                       ></textarea>
                     </div>
                   </div>
+
+                  <div className="col-span-full bg-stone-200 ">
+                    {imgUrls[0] ? (
+                      <FileSelector
+                        sCrop={setImgAfterCrop0}
+                        img={imgUrls[0]}
+                        imgState="image-crop"
+                      />
+                    ) : (
+                      <FileSelector
+                        sCrop={setImgAfterCrop0}
+                        img="/noimage.png"
+                        
+                      />
+                    )}
+                  </div>
+                  <div className="col-span-full bg-stone-50">
+                    {imgUrls[1] ? (
+                      <FileSelector
+                        sCrop={setImgAfterCrop1}
+                        img={imgUrls[1]}
+                        imgState="image-crop"
+                      />
+                    ) : (
+                      <FileSelector
+                        sCrop={setImgAfterCrop1}
+                        img="/noimage.png"
+                      />
+                    )}
+                  </div>
+                  <div className="col-span-full bg-stone-200">
+                    {imgUrls[2] ? (
+                      <FileSelector
+                        sCrop={setImgAfterCrop2}
+                        img={imgUrls[2]}
+                        imgState="image-crop"
+                      />
+                    ) : (
+                      <FileSelector
+                        sCrop={setImgAfterCrop2}
+                        img="/noimage.png"
+                      />
+                    )}
+                  </div>
+                  <div className="col-span-full bg-stone-50">
+                    {imgUrls[3] ? (
+                      <FileSelector
+                        sCrop={setImgAfterCrop3}
+                        img={imgUrls[3]}
+                        imgState="image-crop"
+                      />
+                    ) : (
+                      <FileSelector
+                        sCrop={setImgAfterCrop3}
+                        img="/noimage.png"
+                      />
+                    )}
+                  </div>
+                  <div className="col-span-full bg-stone-200">
+                    {imgUrls[4] ? (
+                      <FileSelector
+                        sCrop={setImgAfterCrop4}
+                        img={imgUrls[4]}
+                        imgState="image-crop"
+                      />
+                    ) : (
+                      <FileSelector
+                        sCrop={setImgAfterCrop4}
+                        img="/noimage.png"
+                      />
+                    )}
+                  </div>
+                  <div className="col-span-full bg-stone-50">
+                    {imgUrls[5] ? (
+                      <FileSelector
+                        sCrop={setImgAfterCrop5}
+                        img={imgUrls[5]}
+                        imgState="image-crop"
+                      />
+                    ) : (
+                      <FileSelector
+                        sCrop={setImgAfterCrop5}
+                        img="/noimage.png"
+                      />
+                    )}
+                  </div>
                 </div>
               </div>
 
@@ -473,25 +524,20 @@ export default function EditBusiness() {
                   >
                     Photo
                   </label>
-                  <div className="mt-2 flex items-center gap-x-3">
-                    <svg
-                      className="h-12 w-12 text-gray-300"
-                      viewBox="0 0 24 24"
-                      fill="currentColor"
-                      aria-hidden="true"
-                    >
-                      <path
-                        fill-rule="evenodd"
-                        d="M18.685 19.097A9.723 9.723 0 0021.75 12c0-5.385-4.365-9.75-9.75-9.75S2.25 6.615 2.25 12a9.723 9.723 0 003.065 7.097A9.716 9.716 0 0012 21.75a9.716 9.716 0 006.685-2.653zm-12.54-1.285A7.486 7.486 0 0112 15a7.486 7.486 0 015.855 2.812A8.224 8.224 0 0112 20.25a8.224 8.224 0 01-5.855-2.438zM15.75 9a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z"
-                        clip-rule="evenodd"
+                  <div className="col-span-full bg-stone-200 ">
+                    {photoUrls[0] ? (
+                      <FileSelector
+                        sCrop={setPhotoAfterCrop0}
+                        img={photoUrls[0]}
+                        imgState="image-crop"
                       />
-                    </svg>
-                    <button
-                      type="button"
-                      className="rounded-md bg-white px-2.5 py-1.5 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
-                    >
-                      Change
-                    </button>
+                    ) : (
+                      <FileSelector
+                        sCrop={setPhotoAfterCrop0}
+                        img="/nophoto.png"
+                        
+                      />
+                    )}
                   </div>
                 </div>
 

@@ -23,6 +23,7 @@ export default function ReviewItemAdmin({ listing, id, onEdit, onDelete }) {
 
   const [userProfile, setUserProfile] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [business, setBusiness] = useState(null);
   const navigate = useNavigate();
 
   const [formDataSpam, setFormDataSpam] = useState({
@@ -97,6 +98,13 @@ export default function ReviewItemAdmin({ listing, id, onEdit, onDelete }) {
     const docRef = doc(db, "reviews", id);
     await updateDoc(docRef, formDataCopy);
 
+    const businessData = {
+      total_number_of_ratings: business.total_number_of_ratings -1,
+      sum_of_ratings: business.sum_of_ratings -  parseInt(listing.rate),
+    };
+    const businessRef = doc(db, "businesses", listing.businessId);
+    await updateDoc(businessRef, businessData);
+
     setLoading(false);
     toast.success("Review deleted");
     navigate(`/business-public/${listing.businessId}`);
@@ -110,6 +118,13 @@ export default function ReviewItemAdmin({ listing, id, onEdit, onDelete }) {
     };
     const docRef = doc(db, "reviews", id);
     await updateDoc(docRef, formDataCopy);
+
+    const businessData = {
+      total_number_of_ratings: 1 + business.total_number_of_ratings,
+      sum_of_ratings: parseInt(listing.rate) + business.sum_of_ratings,
+    };
+    const businessRef = doc(db, "businesses", listing.businessId);
+    await updateDoc(businessRef, businessData);
 
     setLoading(false);
     toast.success("Review undeleted");
@@ -127,6 +142,19 @@ export default function ReviewItemAdmin({ listing, id, onEdit, onDelete }) {
     }
     fetchUserProfile();
   }, [listing.userRef]);
+
+  useEffect(() => {
+    async function fetchBusiness() {
+      const docRef = doc(db, "businesses", listing.businessId);
+      const docSnap = await getDoc(docRef);
+      if (docSnap.exists()) {
+        setBusiness(docSnap.data());
+        setLoading(false);
+      }
+      console.log(business);
+    }
+    fetchBusiness();
+  }, [listing.businessId]);
 
   const [currentImage, setCurrentImage] = useState(0);
   const [viewerIsOpen, setViewerIsOpen] = useState(false);
@@ -147,7 +175,13 @@ export default function ReviewItemAdmin({ listing, id, onEdit, onDelete }) {
   return (
     <>
       <div className="col-span-12 grid grid-cols-12  shadow-md px-2 py-2">
+
         <div className="col-span-4">
+        
+      
+      <a href={`/business-public/${listing.businessId}`}>
+        <h2>{business.business_name}</h2>
+        </a>
           <a href={`/user-public/${listing.userRef}`}>
             {userProfile.name} </a>
             <p>Visit Date: {listing.review_date}</p>

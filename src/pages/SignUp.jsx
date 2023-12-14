@@ -20,7 +20,7 @@ export default function SignUp() {
     photoUrls: [],
     role: "",
   });
-  const { name, email, password,role, photoUrls } = formData;
+  const { name, email, password,role,photoUrls } = formData;
   function onChange(e) {
     setFormData((prevState) => ({
       ...prevState,
