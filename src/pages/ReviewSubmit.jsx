@@ -281,7 +281,7 @@ export default function ReviewSubmit() {
           <div className="col-span-12">
             <button
               type="submit"
-              className="rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+              className="col-span-1 rounded-md bg-[#637a94] px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-[#556a7e] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#637a94]"
             >
               Save
             </button>

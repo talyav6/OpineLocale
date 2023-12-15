@@ -1,12 +1,16 @@
-
-export default function RatingStarsItem( listing ) {
-  let rating = 0;
+export default function RatingStarsItem(listing) {
+  let originalRating = 0;
   if (listing.total_number_of_ratings > 0) {
-    rating = listing.sum_of_ratings / listing.total_number_of_ratings;
+    originalRating = listing.sum_of_ratings / listing.total_number_of_ratings;
   }
-  const yellowStars = [];
 
-  for (let i = 0; i < rating; i++) {
+  const roundedRating = Math.floor(originalRating);
+  const yellowStars = [];
+  const grayStars = [];
+  const maxStars = 5;
+
+  // Create filled yellow stars based on the rounded rating
+  for (let i = 0; i < roundedRating; i++) {
     yellowStars.push(
       <svg
         className="w-4 h-4 text-yellow-300 mr-1"
@@ -20,9 +24,9 @@ export default function RatingStarsItem( listing ) {
       </svg>
     );
   }
-  const grayStars = [];
 
-  for (let i = rating; i < 5; i++) {
+  // Create filled gray stars
+  for (let i = roundedRating; i < maxStars; i++) {
     grayStars.push(
       <svg
         className="w-4 h-4 text-gray-300 mr-1 dark:text-gray-500"
@@ -38,23 +42,19 @@ export default function RatingStarsItem( listing ) {
   }
   return (
     <div className="flex items-center">
-    {listing.total_number_of_ratings > 0 && (
-      <>
-        {yellowStars}
-        {grayStars}
-        <p className="ml-2 text-sm font-medium text-gray-500 dark:text-gray-400">
-          {Number.isInteger(rating) ? rating : rating.toFixed(2)} out of 5
-        </p>
-      </>
-    )}
-    {listing.total_number_of_ratings == 0 && (
-      <>
-        
+      {listing.total_number_of_ratings > 0 ? (
+        <>
+          {yellowStars}
+          {grayStars}
+          <p className="ml-2 text-sm font-medium text-gray-500 dark:text-gray-400">
+            {originalRating.toFixed(2)} out of 5
+          </p>
+        </>
+      ) : (
         <p className="text-sm font-medium text-gray-500 dark:text-gray-400">
           No ratings
         </p>
-      </>
-    )}
-  </div>
+      )}
+    </div>
   );
 }

@@ -62,8 +62,8 @@ export default function SignUp() {
   }
   return (
     <section>
-      <h1 className="text-3xl text-center mt-6 font-bold">Sign Up</h1>
-      <div className="flex justify-center flex-wrap items-center px-6 py-12 max-w-6xl mx-auto">
+      <div className="bg-[#fffffe] flex flex-col justify-center flex-wrap items-center px-1 py-12 max-w-6xl mx-auto">
+      <h1 className="text-3xl text-center py-4 mt-6 font-bold">Sign Up</h1>
 
           <form onSubmit={onSubmit}>
             <input

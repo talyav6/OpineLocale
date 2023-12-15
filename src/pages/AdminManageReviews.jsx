@@ -228,7 +228,7 @@ export default function AdminManageReviews() {
     <main>
       <form
         onSubmit={onSubmitFilter}
-        className="grid grid-cols-12 gap-4 px-3 max-w-6xl mx-auto mb-12 mt-4"
+        className="bg-[#fffffe] grid grid-cols-12 gap-2 py-2 px-3 max-w-6xl mx-auto mb-12 mt-4"
       >
         <h1 className="col-span-1">
           Spam
@@ -323,7 +323,7 @@ export default function AdminManageReviews() {
         </div>
       </form>
             
-      <div className="grid grid-cols-12 gap-4 px-3 max-w-6xl mx-auto mb-12">
+      <div className="bg-[#fffffe] grid grid-cols-12 gap-4 py-4 px-3 max-w-6xl mx-auto mb-12">
         <div className="col-span-12">
           <h2 className="text-2xl font-bold tracking-tight text-gray-900 sm:text-2xl">
             Reviews

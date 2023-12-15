@@ -41,10 +41,10 @@ export default function Login() {
   }
   return (
     <section>
-      <h1 className="text-3xl text-center mt-6 font-bold">Login</h1>
-      <div className="flex justify-center flex-wrap items-center px-6 py-12 max-w-6xl mx-auto">
+      <div className="bg-[#fffffe] flex flex-col justify-center flex-wrap items-center py-12 max-w-6xl mx-auto">
+      <h1 className="text-3xl py-10 text-center font-bold">Login</h1>
 
-        <div className="w-full md:w-[67%] lg:w-[40%] lg:ml-20">
+        <div className="w-full md:w-[50%] lg:w-[50%]">
           <form onSubmit={onSubmit}>
             <input
               type="email"

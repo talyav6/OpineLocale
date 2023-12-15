@@ -5,7 +5,7 @@ export default function BusinessItem({ listing, id, onEdit, onDelete }) {
   const navigate = useNavigate();
 
   return (
-    <div className="col-span-3 items-center bg-white shadow-md px-2 py-2">
+    <div className="col-span-3 items-center bg-[#fffffe] shadow-md px-2 py-2">
       <div className="font-bold text-gray-900">{listing.business_name}</div>
 
       <div>

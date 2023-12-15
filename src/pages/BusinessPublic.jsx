@@ -136,7 +136,7 @@ export default function BusinessPublic() {
   }
   return (
     <main>
-      <div className="grid grid-cols-12 gap-4 px-3 max-w-6xl mx-auto mb-12">
+      <div className="bg-[#fffffe] grid grid-cols-12 gap-4 px-3 max-w-6xl mx-auto mb-12">
         <div className="grid grid-cols-12 col-span-12 mt-2 items-baseline">
           <div className="col-span-9 ">
             <h1 className="text-2xl font-bold tracking-tight text-gray-900 sm:text-3xl">

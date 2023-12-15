@@ -3,6 +3,7 @@ import { db } from "../firebase";
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
+import { withTheme } from "styled-components";
 
 export default function Header() {
   const [pageState, setPageState] = useState("Login");
@@ -81,11 +82,11 @@ export default function Header() {
 
 
   return (
-    <div className="bg-white border-b shadow-sm sticky top-0 z-50">
-      <header className="flex justify-between items-center px-3 max-w-6xl mx-auto">
+    <div className="bg-[#fffffe] border-b shadow-sm sticky top-0 z-50">
+      <header className="bg-[#fffffe] flex justify-between items-center px-3 max-w-6xl mx-auto">
         <div>
         <img
-            src="/logo1.png"
+            src="/logo2.png"
             alt="logo"
             className="h-12 cursor-pointer"
             onClick={() => navigate("/")}

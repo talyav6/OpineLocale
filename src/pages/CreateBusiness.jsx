@@ -210,12 +210,11 @@ export default function CreateBusiness() {
   return (
     <>
       <section>
-        <h1 className="text-3xl text-center mt-6 font-bold">
-          Create your Business!
-        </h1>
-
-        <div className="flex justify-center flex-wrap items-center px-6 py-4 max-w-6xl mx-auto">
+        <div className="bg-[#fffffe] flex justify-center flex-wrap items-center px-6 py-4 max-w-7xl mx-auto">
           <form onSubmit={onSubmit}>
+          <h1 className="text-3xl text-center mt-6 font-bold">
+          Create your Business!
+          </h1>
             <div className="space-y-12">
               <div className="border-b border-gray-900/10 pb-12">
                 <div className="mt-10 grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6">
@@ -255,9 +254,13 @@ export default function CreateBusiness() {
                         autocomplete="business_type"
                         className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:max-w-xs sm:text-sm sm:leading-6"
                       >
+                        <option>Doctor's office</option>
                         <option>Hotel</option>
+                        <option>Law Office</option>
                         <option>Restaurant</option>
-                        <option>Dr office</option>
+                        <option>Shop</option>
+                        <option>Store</option>
+
                       </select>
                     </div>
                   </div>
@@ -361,16 +364,6 @@ export default function CreateBusiness() {
                       />
                     </div>
                   </div>
-
-                  <div className="col-span-full">
-                    <label
-                      for="cover-photo"
-                      className="block text-sm font-medium leading-6 text-gray-900"
-                    >
-                      Business photos (you can upload upto 6 photos)
-                    </label>
-                  </div>
-
                   <div className="col-span-full">
                     <label
                       for="description"
@@ -395,7 +388,7 @@ export default function CreateBusiness() {
                       for="description"
                       className="block text-sm font-medium leading-6 text-gray-900"
                     >
-                      Keywords (comma separated)
+                      Keywords (Comma separated)
                     </label>
                     <div className="mt-2">
                       <textarea
@@ -408,7 +401,14 @@ export default function CreateBusiness() {
                       ></textarea>
                     </div>
                   </div>
-
+                  <div className="col-span-full">
+                    <label
+                      for="cover-photo"
+                      className="block text-sm font-medium leading-6 text-gray-900"
+                    >
+                      Business photos (You can upload up to 6 photos)
+                    </label>
+                  </div>
                   <div className="col-span-full bg-stone-200 ">
                     <FileSelector sCrop={setImgAfterCrop0} img="/noimage.png" />
                   </div>
@@ -498,7 +498,7 @@ export default function CreateBusiness() {
             <div className="mt-6 flex items-center justify-end gap-x-6">
               <button
                 type="submit"
-                className="rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+                className="col-span-1 rounded-md bg-[#637a94] px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-[#556a7e] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#637a94]"
               >
                 Save
               </button>

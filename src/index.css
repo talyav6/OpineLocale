@@ -11,9 +11,18 @@
     background: #a8dadc !important
 }
 
-body{
-    background-color: rgb(239, 243, 244);
+.along-serif {
+  font-family: 'Along Serif BSC Medium', serif; /* Adjust the family name if needed */
 }
+
+body {
+  background-color: rgb(184, 185, 185);
+  background-image: url('assets/bg.png'); /* Adjust the path as necessary */
+  background-repeat: repeat; /* This will prevent the image from repeating */
+  background-position: center; /* This will center the image in the body */
+  background-blend-mode: overlay; /* This will blend the image with the background color */ 
+}
+
 
 svg.star-svg {
     display: inline;

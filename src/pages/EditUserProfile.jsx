@@ -116,8 +116,8 @@ export default function EditUserProfile() {
   return (
     <>
       <section>
-        <h1 className="text-3xl text-center mt-3 font-bold">Your Profile</h1>
-        <div className="flex justify-center flex-wrap items-center px-6 py-4 max-w-6xl mx-auto">
+        <div className="bg-[#fffffe] flex flex-col justify-center flex-wrap items-center px-6 py-4 max-w-6xl mx-auto">
+      <h1 className="text-3xl text-center mt-3 font-bold">Your Profile</h1>
           <form onSubmit={onSubmit}>
             <div className="space-y-12">
               <div className="border-b border-gray-900/10 pb-12">
@@ -190,7 +190,7 @@ export default function EditUserProfile() {
             <div class="mt-6 flex items-center justify-end gap-x-6">
               <button
                 type="submit"
-                class="rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+                className="col-span-1 rounded-md bg-[#637a94] px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-[#556a7e] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#637a94]"
               >
                 Save
               </button>

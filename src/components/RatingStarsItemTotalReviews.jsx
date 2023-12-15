@@ -1,13 +1,14 @@
-
-export default function RatingStarsItemTotalReviews( listing ) {
-  let rating = 0;
+export default function RatingStarsItemTotalReviews(listing) {
+  let originalRating = 0;
   if (listing.total_number_of_ratings > 0) {
-    rating = Math.round(listing.sum_of_ratings / listing.total_number_of_ratings);
+    originalRating = listing.sum_of_ratings / listing.total_number_of_ratings;
   }
+  const flooredRating = Math.floor(originalRating);
   const yellowStars = [];
+  const grayStars = [];
 
-  // create filled yellow stars
-  for (let i = 0; i < rating; i++) {
+  // Create filled yellow stars based on the floored rating
+  for (let i = 0; i < flooredRating; i++) {
     yellowStars.push(
       <svg
         className="w-4 h-4 text-yellow-300 mr-1"
@@ -21,9 +22,9 @@ export default function RatingStarsItemTotalReviews( listing ) {
       </svg>
     );
   }
-  const grayStars = [];
-// create filled gray stars
-  for (let i = rating; i < 5; i++) {
+
+  // Create filled gray stars to make up the total to 5
+  for (let i = flooredRating; i < 5; i++) {
     grayStars.push(
       <svg
         className="w-4 h-4 text-gray-300 mr-1 dark:text-gray-500"
@@ -39,23 +40,19 @@ export default function RatingStarsItemTotalReviews( listing ) {
   }
   return (
     <div className="flex items-center">
-    {listing.total_number_of_ratings > 0 && (
-      <>
-        {yellowStars}
-        {grayStars}
-        <p className="ml-2 text-sm font-medium text-gray-500 dark:text-gray-400">
-        {listing.total_number_of_ratings} Reviews
-        </p>
-      </>
-    )}
-    {listing.total_number_of_ratings == 0 && (
-      <>
-        
+      {listing.total_number_of_ratings > 0 ? (
+        <>
+          {yellowStars}
+          {grayStars}
+          <p className="ml-2 text-sm font-medium text-gray-500 dark:text-gray-400">
+            {originalRating.toFixed(2)} out of 5 - {listing.total_number_of_ratings} Reviews
+          </p>
+        </>
+      ) : (
         <p className="text-sm font-medium text-gray-500 dark:text-gray-400">
           No ratings
         </p>
-      </>
-    )}
-  </div>
+      )}
+    </div>
   );
 }
