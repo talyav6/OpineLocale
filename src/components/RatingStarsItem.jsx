@@ -1,16 +1,12 @@
-export default function RatingStarsItem(listing) {
-  let originalRating = 0;
+
+export default function RatingStarsItem( listing ) {
+  let rating = 0;
   if (listing.total_number_of_ratings > 0) {
-    originalRating = listing.sum_of_ratings / listing.total_number_of_ratings;
+    rating = listing.sum_of_ratings / listing.total_number_of_ratings;
   }
-
-  const roundedRating = Math.floor(originalRating);
   const yellowStars = [];
-  const grayStars = [];
-  const maxStars = 5;
 
-  // Create filled yellow stars based on the rounded rating
-  for (let i = 0; i < roundedRating; i++) {
+  for (let i = 0; i < rating; i++) {
     yellowStars.push(
       <svg
         className="w-4 h-4 text-yellow-300 mr-1"
@@ -24,9 +20,9 @@ export default function RatingStarsItem(listing) {
       </svg>
     );
   }
+  const grayStars = [];
 
-  // Create filled gray stars
-  for (let i = roundedRating; i < maxStars; i++) {
+  for (let i = rating; i < 5; i++) {
     grayStars.push(
       <svg
         className="w-4 h-4 text-gray-300 mr-1 dark:text-gray-500"
@@ -42,19 +38,23 @@ export default function RatingStarsItem(listing) {
   }
   return (
     <div className="flex items-center">
-      {listing.total_number_of_ratings > 0 ? (
-        <>
-          {yellowStars}
-          {grayStars}
-          <p className="ml-2 text-sm font-medium text-gray-500 dark:text-gray-400">
-            {originalRating.toFixed(2)} out of 5
-          </p>
-        </>
-      ) : (
+    {listing.total_number_of_ratings > 0 && (
+      <>
+        {yellowStars}
+        {grayStars}
+        <p className="ml-2 text-sm font-medium text-gray-500 dark:text-gray-400">
+          {Number.isInteger(rating) ? rating : rating.toFixed(2)} out of 5
+        </p>
+      </>
+    )}
+    {listing.total_number_of_ratings == 0 && (
+      <>
+        
         <p className="text-sm font-medium text-gray-500 dark:text-gray-400">
           No ratings
         </p>
-      )}
-    </div>
+      </>
+    )}
+  </div>
   );
 }

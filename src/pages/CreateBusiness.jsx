@@ -254,12 +254,21 @@ export default function CreateBusiness() {
                         autocomplete="business_type"
                         className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:max-w-xs sm:text-sm sm:leading-6"
                       >
-                        <option>Doctor's office</option>
-                        <option>Hotel</option>
-                        <option>Law Office</option>
-                        <option>Restaurant</option>
-                        <option>Shop</option>
-                        <option>Store</option>
+                        <option>Automotive Services</option>
+                        <option>Beauty and Wellness</option>
+                        <option>Educational Institution</option>
+                        <option>Entertainment Venue</option>
+                        <option>Financial Services</option>
+                        <option>Healthcare Provider</option>
+                        <option>Home Services</option>
+                        <option>Hotels and Accommodations</option>
+                        <option>Legal Services</option>
+                        <option>Pet Services</option>
+                        <option>Real Estate</option>
+                        <option>Restaurant/Cafe</option>
+                        <option>Retail Store</option>
+                        <option>Technology Services</option>
+                        <option>Travel Service</option>
 
                       </select>
                     </div>

@@ -74,10 +74,10 @@ export default function UserPublic() {
           <div className="col-span-2">
             <img
               src={userProfile.photoUrls[0] ? userProfile.photoUrls[0] : "/nophoto.png"}
-              className=" w-36 h-36 "
+              className=" w-42 h-36 "
             />
           </div>
-          <div className="col-span-10">
+          <div className="col-span-8"style={{ paddingLeft: '20px', paddingTop: '35px'}}>
             <h1 className="text-2xl font-bold tracking-tight text-gray-900 sm:text-3xl">
               {userProfile.name}
             </h1>

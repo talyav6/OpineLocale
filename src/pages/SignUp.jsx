@@ -108,7 +108,7 @@ export default function SignUp() {
                       for="business_type"
                       class="block text-sm font-medium leading-6 text-gray-900"
                     >
-                      You are a user or own a business?
+                      Are you a user or a business owner?
                     </label>
                     <div class="mt-2">
                       <select
@@ -126,9 +126,9 @@ export default function SignUp() {
                   </div>
             <div className="flex justify-between whitespace-nowrap text-sm sm:text-lg py-5">
               <p className="mb-6">
-                Have a account?
+                Have an account?
                 <Link
-                  to="/sign-in"
+                  to="/login"
                   className="text-red-600 hover:text-red-700 transition duration-200 ease-in-out ml-1"
                 >
                   Sign in
