@@ -1,4 +1,4 @@
-
+//used in reviews section in BusinessPublic and UserPublic
 export default function RatingStarsItemOnlyStars( listing ) {
 
   const yellowStars = [];

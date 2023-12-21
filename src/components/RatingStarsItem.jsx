@@ -1,12 +1,13 @@
-
+// used in HomePage and SearchResults
 export default function RatingStarsItem( listing ) {
   let rating = 0;
   if (listing.total_number_of_ratings > 0) {
     rating = listing.sum_of_ratings / listing.total_number_of_ratings;
+    //rating = Math.floor(rating);
   }
   const yellowStars = [];
 
-  for (let i = 0; i < rating; i++) {
+  for (let i = 0; i < Math.floor(rating); i++) {
     yellowStars.push(
       <svg
         className="w-4 h-4 text-yellow-300 mr-1"
@@ -22,7 +23,7 @@ export default function RatingStarsItem( listing ) {
   }
   const grayStars = [];
 
-  for (let i = rating; i < 5; i++) {
+  for (let i = Math.floor(rating); i < 5; i++) {
     grayStars.push(
       <svg
         className="w-4 h-4 text-gray-300 mr-1 dark:text-gray-500"

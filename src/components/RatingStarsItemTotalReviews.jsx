@@ -1,13 +1,13 @@
-
+//used in Business Public
 export default function RatingStarsItemTotalReviews( listing ) {
   let rating = 0;
   if (listing.total_number_of_ratings > 0) {
-    rating = Math.round(listing.sum_of_ratings / listing.total_number_of_ratings);
+    rating = listing.sum_of_ratings / listing.total_number_of_ratings;
   }
   const yellowStars = [];
 
   // create filled yellow stars
-  for (let i = 0; i < rating; i++) {
+  for (let i = 0; i < Math.floor(rating); i++) {
     yellowStars.push(
       <svg
         className="w-4 h-4 text-yellow-300 mr-1"
@@ -23,7 +23,7 @@ export default function RatingStarsItemTotalReviews( listing ) {
   }
   const grayStars = [];
 // create filled gray stars
-  for (let i = rating; i < 5; i++) {
+  for (let i = Math.floor(rating); i < 5; i++) {
     grayStars.push(
       <svg
         className="w-4 h-4 text-gray-300 mr-1 dark:text-gray-500"

@@ -97,10 +97,14 @@ export default function ReviewItemAdmin({ listing, id, onEdit, onDelete }) {
     };
     const docRef = doc(db, "reviews", id);
     await updateDoc(docRef, formDataCopy);
-
+    // console.log("business.sum_of_ratings");
+    // console.log(business.sum_of_ratings);
+    // console.log("parseInt(listing.rate)");
+    // console.log(listing.rating);
+    
     const businessData = {
       total_number_of_ratings: business.total_number_of_ratings -1,
-      sum_of_ratings: business.sum_of_ratings -  parseInt(listing.rate),
+      sum_of_ratings: business.sum_of_ratings -  listing.rating,
     };
     const businessRef = doc(db, "businesses", listing.businessId);
     await updateDoc(businessRef, businessData);
@@ -121,7 +125,7 @@ export default function ReviewItemAdmin({ listing, id, onEdit, onDelete }) {
 
     const businessData = {
       total_number_of_ratings: 1 + business.total_number_of_ratings,
-      sum_of_ratings: parseInt(listing.rate) + business.sum_of_ratings,
+      sum_of_ratings: listing.rating + business.sum_of_ratings,
     };
     const businessRef = doc(db, "businesses", listing.businessId);
     await updateDoc(businessRef, businessData);
